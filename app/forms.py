@@ -4,6 +4,8 @@ from wtforms.validators import DataRequired, Email, ValidationError, EqualTo
 import sqlalchemy as sa
 from app import db
 from app.models import User
+from wtforms import TextAreaField
+from wtforms.validators import Length
 
 class LOgin(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -28,4 +30,9 @@ class Register(FlaskForm):
         email = User.query.filter_by(email=email.data).first()
         if email is not None:
             raise ValidationError('Oops! An account already exists with the same email address.')
-        
+
+
+class EditProfile(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    about_me = TextAreaField('About me', validators=[Length(min=0, max=180)])
+    submit = SubmitField('Save')

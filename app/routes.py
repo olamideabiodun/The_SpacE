@@ -9,6 +9,8 @@ from flask_login import login_required, UserMixin, LoginManager
 from flask import request
 from urllib.parse import urlsplit
 from app.forms import Register
+from datetime import timezone, datetime
+from app.forms import EditProfile
 
 
 @app.route('/')
@@ -76,3 +78,45 @@ def register():
         flash('Sign up successful, now proceed to login!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Sign up', form=form)
+
+@app.route('/user/<username>')
+@login_required
+def user(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    posts = [
+        {'author': user, 'body': 'Testing'},
+        {'author': user, 'body': 'Testing'}
+    ]
+    return render_template('user.html', user = user, posts = posts)
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.now(timezone.utc)
+        db.session.commit()
+
+
+@app.route('/editProfile', methods=['GET', 'POST'])
+@login_required
+def editProfile():
+    form = EditProfile()
+    # if form.validate_on_submit():
+    #     current_user.username = form.username.data
+    #     current_user.about_me = form.about_me.data
+    #     db.session.commit()
+    #     flash('Changes saved.')
+    #     return redirect(url_for('editProfile'))
+    # elif request.method == 'GET':
+    #     form.username.data = current_user.username
+    #     form.about_me.data = current_user.about_me
+    # return render_template('editProfile.html', title='Edit Profile', form=form)
+
+    if request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+        return render_template('editProfile.html', title='Edit Profile', form=form)
+    elif form.validate_on_submit():
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        return redirect(url_for('editProfile'))
