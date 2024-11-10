@@ -1,12 +1,11 @@
-from app import app
-import logging
+from app import create_app, db
+from app.models import User, Post
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+app = create_app()
+
+@app.shell_context_processor
+def make_shell_context():
+    return {'db': db, 'User': User, 'Post': Post}
 
 if __name__ == "__main__":
-    try:
-        app.run()
-    except Exception as e:
-        logger.error(f"Failed to run app: {e}") 
+    app.run() 

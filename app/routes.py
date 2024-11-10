@@ -266,6 +266,6 @@ def messages():
 def not_found_error(error):
     return render_template('404.html'), 404
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
