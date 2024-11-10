@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h3>Conversations</h3>
+        </div>
+        <div class="conversation-list">
+            <!-- Placeholder for future conversation list -->
+            <div class="conversation-item active">
+                <img src="{{ current_user.avatar(40) }}" class="rounded-circle" />
+                <div class="conversation-info">
+                    <span class="name">All Messages</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-main">
+        <div class="chat-header">
+            <h2>Messages</h2>
+        </div>
+        
+        <div class="messages-list">
+            {% for message in messages %}
+                <div class="message-bubble {% if message.sender == current_user %}message-sent{% else %}message-received{% endif %}">
+                    <div class="message-avatar">
+                        <a href="{{ url_for('user', username=message.sender.username) }}">
+                            <img src="{{ message.sender.avatar(50) }}" class="rounded-circle" />
+                        </a>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <a href="{{ url_for('user', username=message.sender.username) }}" class="username">
+                                {{ message.sender.username }}
+                            </a>
+                            <span class="timestamp">{{ moment(message.timestamp).fromNow() }}</span>
+                        </div>
+                        <div class="message-body">
+                            {{ message.body }}
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📫</div>
+                    <h3>No messages yet</h3>
+                    <p>When you receive messages, they will appear here.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 60px); /* Adjust based on your navbar height */
+            background: #f8f9fa;
+            margin: -20px; /* Offset parent padding */
+        }
+
+        /* Sidebar Styles */
+        .chat-sidebar {
+            width: 300px;
+            background: #fff;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        .conversation-list {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .conversation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .conversation-item img {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .conversation-info {
+            flex: 1;
+        }
+
+        .conversation-info .name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .conversation-info .timestamp {
+            font-size: 0.9em;
+            color: #909090;
+        }
+
+        .chat-main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .chat-header {
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message-bubble {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .message-bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .message-avatar img {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .username {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .timestamp {
+            font-size: 0.9em;
+            color: #909090;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            color: #666;
+        }
+    </style>
+{% endblock %} 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} - The S___E</title>
+    <title>{{ title }} - The_SpacE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     {{ moment.include_moment() }}
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -15,7 +15,9 @@
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0">
-                    <a href="{{ url_for('index') }}" class="text-xl font-bold text-gray-800">Microblog</a>
+                    <a href="{{ url_for('index') }}" class="flex items-center mb-6 text-2xl font-bold text-gray-700">
+                        The_SpacE    
+                    </a>
                 </div>
 
                 <!-- Navigation Links -->
@@ -40,6 +42,7 @@
                                  alt="Avatar" 
                                  class="w-8 h-8 rounded-full border-2 border-gray-200 hover:border-blue-500"
                                  title="{{ current_user.username }}'s profile">
+                            <span class="text-sm font-medium text-gray-700">{{ current_user.username }}</span>
                         </a>
                     {% endif %}
                 </div>

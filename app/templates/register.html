@@ -1,39 +1,99 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<style>
+    .fade-in {
+        animation: fadeIn 0.6s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .input-field:focus {
+        box-shadow: 0 0 0 2px #f3f4f6, 0 0 0 4px #9ca3af;
+        transition: all 0.2s ease;
+    }
+
+    .btn-hover {
+        transition: all 0.3s ease;
+    }
+
+    .btn-hover:hover {
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h1>Sign Up</h1>
-    <form action="", method="post">
-        {{ form.hidden_tag() }}
-        <p>
-            {{form.username.label}}<br>
-            {{form.username(size=32)}} <b>
-            {% for error in form.username.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            <span style="font-weight: normal;">{{form.email.label}}</span><br>
-            {{form.email(size=64)}}<br>
-            {% for error in form.email.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            <span style="font-weight: normal;">{{form.password.label}}</span><br>
-            {{form.password(size=32)}}<br>
-            {% for error in form.password.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            <span style="font-weight: normal;">{{form.password2.label}}</span><br>
-            {{form.password2(size=32)}}<br>
-            {% for error in form.password2.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.submit()}}
-        </p>
-    </form>
+<section class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto min-h-screen">
+        <div class="fade-in w-full max-w-md">
+            <a href="{{ url_for('index') }}" class="flex items-center justify-center mb-8">
+                <span class="text-3xl font-bold text-gray-700">The_SpacE</span>
+            </a>
+            
+            <div class="bg-white rounded-xl shadow-lg p-8 space-y-6 border border-gray-100">
+                <div class="space-y-2 text-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Create your account</h1>
+                    <p class="text-gray-500">Join our community today</p>
+                </div>
+
+                <form class="space-y-5" action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="space-y-2">
+                        {{ form.username.label(class="text-sm font-medium text-gray-700 block") }}
+                        {{ form.username(class="input-field w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none text-gray-900 text-sm", placeholder="Enter your username") }}
+                        {% for error in form.username.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="space-y-2">
+                        {{ form.email.label(class="text-sm font-medium text-gray-700 block") }}
+                        {{ form.email(class="input-field w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none text-gray-900 text-sm", placeholder="name@example.com") }}
+                        {% for error in form.email.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="space-y-2">
+                        {{ form.password.label(class="text-sm font-medium text-gray-700 block") }}
+                        {{ form.password(class="input-field w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none text-gray-900 text-sm", placeholder="Create a password") }}
+                        {% for error in form.password.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="space-y-2">
+                        {{ form.password2.label(class="text-sm font-medium text-gray-700 block") }}
+                        {{ form.password2(class="input-field w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none text-gray-900 text-sm", placeholder="Confirm your password") }}
+                        {% for error in form.password2.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn-hover w-full py-3 px-4 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-sm transition-all duration-200 flex items-center justify-center gap-2">
+                        <span>Create Account</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                    
+                    <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                        Already have an account? <a href="{{ url_for('login') }}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

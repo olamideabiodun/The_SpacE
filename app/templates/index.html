@@ -1,83 +1,189 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Post Form -->
-    {% if form %}
-    <div class="p-6 mb-8 bg-white rounded-lg shadow">
-        <h2 class="mb-4 text-xl font-bold text-gray-900">Create Post</h2>
-        <form action="{{ url_for('create_post') }}" method="post">
-            {{ form.hidden_tag() }}
-            <div class="mb-4">
-                {{ form.post(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500", rows="3", placeholder="What's on your mind?") }}
-            </div>
-            <div class="flex justify-end">
-                {{ form.submit(class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700") }}
-            </div>
-        </form>
-    </div>
-    {% endif %}
-
-    <!-- Search Bar -->
-    <div class="mb-8">
-        <form action="{{ url_for('index') }}" method="get" class="flex gap-2">
-            <input type="text" name="q" value="{{ search_query }}" 
-                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   placeholder="Search posts and users...">
-            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                Search
-            </button>
-        </form>
-    </div>
-
-    <!-- Posts -->
-    <div class="space-y-6">
-        {% for post in posts %}
-        <div class="p-6 bg-white rounded-lg shadow">
-            <div class="flex items-center mb-4">
-                <img class="w-10 h-10 rounded-full" src="{{ post.author.avatar(36) }}" alt="Avatar">
-                <div class="ml-3">
-                    <a href="{{ url_for('user', username=post.author.username) }}" 
-                       class="text-sm font-medium text-gray-900 hover:underline">
-                        {{ post.author.username }}
-                    </a>
-                    <p class="text-sm text-gray-500">
-                        {{ moment(post.timestamp).fromNow() }}
+<!-- Hero Section -->
+<section class="relative z-10 pt-[120px] pb-16 md:pt-[150px] md:pb-[120px] bg-gradient-to-b from-primary-50 to-white">
+    <div class="container">
+        <div class="flex flex-wrap -mx-4">
+            <div class="w-full px-4 lg:w-5/12">
+                <div class="hero-content">
+                    <h1 class="mb-5 text-4xl font-bold !leading-[1.208] text-dark sm:text-[42px] lg:text-[40px] xl:text-5xl">
+                        Your Professional Workspace for Architecture & Engineering
+                    </h1>
+                    <p class="mb-8 max-w-[480px] text-base text-body-color">
+                        Collaborate, learn, and preview CAD/BIM files in one space. Connect with professionals, 
+                        join study groups, and manage your projects efficiently.
                     </p>
-                </div>
-            </div>
-            <p class="text-gray-700">{{ post.body }}</p>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Users (if searching) -->
-    {% if users %}
-    <div class="mt-8">
-        <h2 class="mb-4 text-xl font-bold text-gray-900">Users</h2>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {% for user in users %}
-            <div class="p-4 bg-white rounded-lg shadow">
-                <div class="flex items-center">
-                    <img class="w-12 h-12 rounded-full" src="{{ user.avatar(48) }}" alt="Avatar">
-                    <div class="ml-3">
-                        <a href="{{ url_for('user', username=user.username) }}" 
-                           class="text-sm font-medium text-gray-900 hover:underline">
-                            {{ user.username }}
-                        </a>
-                        <p class="text-sm text-gray-500">
-                            {{ user.about_me or "No bio available" }}
-                        </p>
+                    
+                    <div class="flex flex-col items-start space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                        {% if current_user.is_anonymous %}
+                            <a href="{{ url_for('login') }}" 
+                               class="rounded-md bg-primary px-8 py-3 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80">
+                                Get Started
+                            </a>
+                            <a href="{{ url_for('register') }}" 
+                               class="rounded-md border border-primary bg-transparent px-8 py-3 text-base font-semibold text-primary duration-300 ease-in-out hover:bg-primary hover:text-white">
+                                Sign Up Free
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+
+            <div class="hidden px-4 lg:block lg:w-7/12">
+                <div class="lg:ml-auto lg:text-right">
+                    <div class="relative z-10 inline-block pt-11 lg:pt-0">
+                        <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&auto=format&fit=crop&q=80" 
+                             alt="hero" 
+                             class="max-w-full lg:ml-auto">
+                        <span class="absolute -left-8 -bottom-8 z-[-1]">
+                            <svg width="93" height="93" viewBox="0 0 93 93" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="2.5" cy="2.5" r="2.5" fill="#3056D3"/>
+                                <!-- Add more decorative circles -->
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 md:py-20 lg:py-28">
+    <div class="container">
+        <div class="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Feature 1: File Preview -->
+            <div class="w-full">
+                <div class="wow fadeInUp" data-wow-delay=".1s">
+                    <div class="relative mb-10">
+                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&auto=format&fit=crop&q=80" 
+                             alt="CAD Preview Feature" 
+                             class="w-full h-48 object-cover rounded-lg mb-4">
+                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
+                            <i class="fas fa-file-alt text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
+                        CAD & BIM Preview
+                    </h3>
+                    <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
+                        Preview architectural and engineering files without specialized software.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2: Collaboration -->
+            <div class="w-full">
+                <div class="wow fadeInUp" data-wow-delay=".15s">
+                    <div class="relative mb-10">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop&q=80" 
+                             alt="Collaboration Feature" 
+                             class="w-full h-48 object-cover rounded-lg mb-4">
+                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
+                        Real-time Collaboration
+                    </h3>
+                    <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
+                        Connect with team members, share feedback, and manage projects efficiently.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3: Learning -->
+            <div class="w-full">
+                <div class="wow fadeInUp" data-wow-delay=".2s">
+                    <div class="relative mb-10">
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80" 
+                             alt="Learning Feature" 
+                             class="w-full h-48 object-cover rounded-lg mb-4">
+                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
+                            <i class="fas fa-graduation-cap text-xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
+                        Learning Hub
+                    </h3>
+                    <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
+                        Join study groups, access learning resources, and connect with instructors.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activity Section -->
+{% if current_user.is_authenticated %}
+<section class="py-16 bg-gray-50">
+    <div class="container">
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold text-dark">Recent Activity</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {% for post in posts %}
+                <div class="wow fadeInUp rounded-md bg-white p-6 shadow-md">
+                    {% include '_posts.html' %}
+                </div>
             {% endfor %}
         </div>
     </div>
-    {% endif %}
-</div>
+</section>
+{% endif %}
 {% endblock %}
 
 {% block styles %}
-<link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
+<style>
+:root {
+    --color-primary: #3056D3;
+    --color-dark: #090E34;
+    --color-body: #637381;
+}
+
+.bg-primary {
+    background-color: var(--color-primary);
+}
+
+.text-primary {
+    color: var(--color-primary);
+}
+
+.text-dark {
+    color: var(--color-dark);
+}
+
+.text-body-color {
+    color: var(--color-body);
+}
+
+/* Add animation classes */
+.wow {
+    visibility: hidden;
+}
+
+.fadeInUp {
+    animation: fadeInUp 1s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
 {% endblock %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+<script>
+    new WOW().init();
+</script>

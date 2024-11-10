@@ -1,31 +1,145 @@
 {% extends "base.html" %}
+
+{% block styles %}
+<style>
+    .fade-in {
+        animation: fadeIn 0.6s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .social-btn:hover {
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #e5e7eb;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <h1>Sign In</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p> {{ form.username.label }} <br>
-        {{ form.username(size=32) }}<br>
-        {% for error in form.username.errors %}
-        <span style="color: red;">
-            [{{ error }}]
-        </span>
-        {% endfor %}
-    </p>
-    <p>
-        {{ form.Password.label}} <br>
-        {{ form.Password(size=32 )}}<br>
-        {% for error in form.username.errors %}
-        <span style="color: red;">
-            [{{ error }}]
-        </span>
-        {% endfor %}
-    </p>
-    <p>
-        {{form.remember_me()}} {{form.remember_me.label}}
-    </p>
-    <p>
-        {{form.Submit()}}
-    </p>
-    <p>New User? <a href="{{url_for('register')}}">Sign up!</a></p>
-    </form>
+<section class="min-h-screen bg-[#F4F7FF] lg:py-20 md:py-16 py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-[525px] mx-auto">
+            <!-- Main Card -->
+            <div class="fade-in bg-white rounded-xl relative overflow-hidden 
+                        py-12 px-6 sm:px-8 md:px-12 
+                        shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+                
+                <!-- Header Section -->
+                <div class="mb-8 md:mb-10 text-center">
+                    <a href="{{ url_for('index') }}" class="inline-block mb-4 md:mb-6">
+                        <span class="text-2xl md:text-2xl font-bold text-gray-700">The_SpacE</span>
+                    </a>
+                    <h1 class="text-gray-900 font-bold text-xl sm:text-2xl md:text-3xl mb-3">
+                        Sign in to your account
+                    </h1>
+                    <p class="text-gray-500 text-sm md:text-base">
+                        Welcome back! Please enter your details
+                    </p>
+                </div>
+
+                <!-- Social Buttons -->
+                <div class="space-y-3 md:space-y-4 mb-8">
+                    <button class="social-btn flex items-center justify-center w-full 
+                                 py-2.5 md:py-3 px-4 
+                                 border border-gray-300 rounded-lg 
+                                 hover:bg-gray-50 transition-all duration-200">
+                        <img src="{{ url_for('static', filename='images/google.svg') }}" 
+                             class="w-4 h-4 md:w-5 md:h-5 mr-3" alt="Google">
+                        <span class="text-sm md:text-base font-medium text-gray-700">Sign in with Google</span>
+                    </button>
+                    <button class="social-btn flex items-center justify-center w-full 
+                                 py-2.5 md:py-3 px-4 
+                                 border border-gray-300 rounded-lg 
+                                 hover:bg-gray-50 transition-all duration-200">
+                        <img src="{{ url_for('static', filename='images/github.svg') }}" 
+                             class="w-4 h-4 md:w-5 md:h-5 mr-3" alt="GitHub">
+                        <span class="text-sm md:text-base font-medium text-gray-700">Sign in with GitHub</span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="flex items-center gap-3 mb-8 divider text-gray-500 text-sm">
+                    <span class="text-sm md:text-base">Or continue with</span>
+                </div>
+
+                <!-- Form -->
+                <form class="space-y-6" action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="space-y-2">
+                        {{ form.username.label(class="text-sm md:text-base font-medium text-gray-900 block") }}
+                        {{ form.username(class="w-full rounded-lg border border-gray-300 
+                                             py-2.5 md:py-3 px-4 
+                                             text-sm md:text-base font-medium text-gray-900 
+                                             outline-none transition 
+                                             focus:border-gray-600 focus:shadow-md", 
+                                             placeholder="Enter your username") }}
+                        {% for error in form.username.errors %}
+                        <p class="text-red-500 text-xs md:text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="space-y-2">
+                        {{ form.password.label(class="text-sm md:text-base font-medium text-gray-900 block") }}
+                        {{ form.password(class="w-full rounded-lg border border-gray-300 
+                                             py-2.5 md:py-3 px-4 
+                                             text-sm md:text-base font-medium text-gray-900 
+                                             outline-none transition 
+                                             focus:border-gray-600 focus:shadow-md", 
+                                             placeholder="Enter your password") }}
+                        {% for error in form.password.errors %}
+                        <p class="text-red-500 text-xs md:text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Remember Me & Forgot Password -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
+                        <div class="flex items-center">
+                            {{ form.remember_me(class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500") }}
+                            {{ form.remember_me.label(class="ml-2 text-sm md:text-base text-gray-600") }}
+                        </div>
+                        <a href="{{ url_for('reset_password_request') }}" 
+                           class="text-sm md:text-base font-medium text-gray-600 hover:text-gray-900 hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full px-6 py-2.5 md:py-3 
+                                   text-sm md:text-base font-medium text-white 
+                                   bg-gray-900 rounded-lg 
+                                   hover:bg-gray-800 transition duration-200 hover:shadow-md">
+                        Sign in
+                    </button>
+
+                    <!-- Sign Up Link -->
+                    <p class="text-sm md:text-base text-gray-600 text-center mt-6">
+                        Don't have an account? 
+                        <a href="{{ url_for('register') }}" 
+                           class="text-gray-900 hover:underline font-medium">
+                            Sign up for free
+                        </a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

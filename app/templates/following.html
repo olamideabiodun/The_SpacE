@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold mb-2">{{ user.username }} is following</h1>
+            <p class="text-gray-600">{{ following|length }} following</p>
+        </div>
+        
+        <div class="space-y-4">
+            {% for followed in following %}
+                <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ followed.avatar(64) }}" 
+                             alt="{{ followed.username }}'s avatar"
+                             class="w-12 h-12 rounded-full">
+                        <div>
+                            <a href="{{ url_for('user', username=followed.username) }}" 
+                               class="font-medium hover:text-primary">
+                                {{ followed.username }}
+                            </a>
+                            {% if followed.about_me %}
+                                <p class="text-sm text-gray-600">{{ followed.about_me }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %} 

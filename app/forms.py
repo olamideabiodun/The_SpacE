@@ -7,11 +7,11 @@ from app.models import User
 from wtforms import TextAreaField
 from wtforms.validators import Length
 
-class LOgin(FlaskForm):
+class Login(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    Password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
-    Submit = SubmitField('Sign In')
+    submit = SubmitField('Sign In')
 
 class Register(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -60,3 +60,18 @@ class PostForm(FlaskForm):
         Length(min=1, max=140)
     ])
     submit = SubmitField('Post')
+
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
+class MessageForm(FlaskForm):
+    message = TextAreaField('Message', validators=[
+        DataRequired(), Length(min=0, max=140)])
+    submit = SubmitField('Send')

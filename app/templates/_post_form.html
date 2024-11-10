@@ -1,11 +1,27 @@
-<form action="" method="post">
+<form action="" method="post" class="relative w-full max-w-3xl mx-auto mb-6">
     {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.post.label }}
-        {{ form.post(class="form-control") }}
-        {% for error in form.post.errors %}
-            <span class="error">{{ error }}</span>
-        {% endfor %}
+    <div class="relative">
+        <!-- Spacious Modern Textbox -->
+        {{ form.post(class="w-full px-6 py-4 min-h-[120px] bg-gray-900/30 rounded-xl border border-gray-700/30 text-gray-200 placeholder:text-gray-500 focus:outline-none focus:border-gray-600/50 focus:ring-0 transition-colors resize-none",
+                    placeholder="Share your thoughts...",
+                    rows="4") }}
+        
+        <!-- Clean Bottom-Right Send Button -->
+        <button type="submit" 
+                class="absolute bottom-4 right-4 px-6 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-all">
+            Send
+        </button>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form> 
+
+    <!-- Error Messages -->
+    {% for error in form.post.errors %}
+    <span class="mt-2 text-sm text-red-400">{{ error }}</span>
+    {% endfor %}
+</form>
+
+<style>
+    /* Optional: Add subtle focus effect */
+    textarea:focus {
+        background: rgba(17, 24, 39, 0.4);
+    }
+</style> 

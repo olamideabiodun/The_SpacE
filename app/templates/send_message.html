@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/send_messages.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-sidebar">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search conversations...">
+            <i class="fas fa-search"></i>
+        </div>
+
+        <div class="recipient-info">
+            <div class="recipient-avatar">
+                <img src="{{ recipient.avatar(80) }}" alt="{{ recipient.username }}">
+                <span class="status-indicator"></span>
+            </div>
+            <h3>{{ recipient.username }}</h3>
+            <span class="status-text">Active Now</span>
+        </div>
+
+        <div class="recent-chats">
+            <h4>Recent Conversations</h4>
+            <div class="chat-list">
+                <!-- Recent chats will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-main">
+        <div class="chat-header">
+            <div class="header-left">
+                <button class="btn-menu mobile-only">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Message to {{ recipient.username }}</h2>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" title="Voice Call">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <button class="btn btn-secondary" title="Video Call">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button class="btn btn-secondary" title="More">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="compose-area">
+            <form action="" method="post" id="messageForm">
+                {{ form.hidden_tag() }}
+                <div class="message-input-container">
+                    <div class="formatting-toolbar">
+                        <button type="button" class="btn-format" title="Bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button type="button" class="btn-format" title="Italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button type="button" class="btn-format" title="Link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <span class="separator">|</span>
+                        <button type="button" class="btn-format" title="Attach">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <button type="button" class="btn-format" title="Emoji">
+                            <i class="far fa-smile"></i>
+                        </button>
+                    </div>
+
+                    {{ form.message(class_="message-input", placeholder="Type your message...") }}
+                    
+                    <div class="message-footer">
+                        <div class="typing-indicator">
+                            <span class="character-count">0/140</span>
+                        </div>
+                        <div class="message-actions">
+                            {{ form.submit(class_="send-button") }}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('messageForm');
+    const input = form.querySelector('.message-input');
+    const sendButton = form.querySelector('.send-button');
+    const characterCount = document.querySelector('.character-count');
+
+    // Character count update
+    function updateCharacterCount() {
+        const count = input.value.length;
+        characterCount.textContent = `${count}/140`;
+        
+        if (count >= 130 && count < 140) {
+            characterCount.classList.add('near-limit');
+            characterCount.classList.remove('at-limit');
+        } else if (count >= 140) {
+            characterCount.classList.add('at-limit');
+            characterCount.classList.remove('near-limit');
+        } else {
+            characterCount.classList.remove('near-limit', 'at-limit');
+        }
+    }
+
+    // Event listeners
+    input.addEventListener('input', updateCharacterCount);
+
+    // Format buttons
+    document.querySelectorAll('.btn-format').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Add formatting functionality here
+        });
+    });
+
+    // Mobile menu toggle
+    const menuBtn = document.querySelector('.btn-menu');
+    const sidebar = document.querySelector('.chat-sidebar');
+    
+    menuBtn?.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+    });
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!input.value.trim()) {
+            input.classList.add('shake');
+            setTimeout(() => input.classList.remove('shake'), 500);
+            return;
+        }
+
+        try {
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Submit the form
+            form.submit();
+        } catch (error) {
+            console.error('Error:', error);
+            sendButton.disabled = false;
+            sendButton.innerHTML = 'Send';
+        }
+    });
+});
+</script>
+{% endblock %} 

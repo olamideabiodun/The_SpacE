@@ -1,22 +1,100 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Edit Profile</h1>
-<form action="" method="post">
-    {{ form.hidden_tag()}}
-    <p> {{ form.username.label }} <br>
-        {{ form.username(size=32) }} <br>
-        {% for error in form.username.errors %}
-        <span style="color: red;"> {{ error }} </span>
-        {% endfor %}
-    </p>
-    <p> {{ form.about_me.label }} <br>
-        {{ form.about_me(cols=50, rows=4) }} <br>
-        {% for error in form.about_me.errors %}
-        <span style="color: red;"> {{ error }} </span>
-        {% endfor %}
-    </p>
-    <p> {{form.submit()}} </p> <p>Go to <a href="{{url_for('user', username=current_user.username)}}">profile </a></p>
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Edit Card -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ current_user.avatar(128) }}" class="rounded-circle mb-3" alt="{{ current_user.username }}">
+                    <h3 class="card-title">{{ current_user.username }}</h3>
+                    
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ current_user.followers_count() }}</h5>
+                            <small class="text-muted">Followers</small>
+                        </div>
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ current_user.following_count() }}</h5>
+                            <small class="text-muted">Following</small>
+                        </div>
+                    </div>
 
-</form>
+                    <a href="{{ url_for('user', username=current_user.username) }}" 
+                       class="btn btn-outline-secondary w-100">Back to Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Edit Profile</h4>
+                    <form action="" method="post">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control", size=32) }}
+                            {% for error in form.username.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.about_me.label(class="form-label") }}
+                            {{ form.about_me(class="form-control", rows=4) }}
+                            {% for error in form.about_me.errors %}
+                                <span class="text-danger small">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        {{ form.submit(class="btn btn-primary") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/user.css') }}" rel="stylesheet">
+{% endblock %}
+<div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h1>
+    
+    <form action="" method="post" class="space-y-6">
+        {{ form.hidden_tag() }}
+        
+        <!-- Username Field -->
+        <div class="space-y-2">
+            {{ form.username.label(class="block text-sm font-medium text-gray-700") }}
+            {{ form.username(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", size=32) }}
+            {% for error in form.username.errors %}
+                <span class="text-sm text-red-600">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <!-- About Me Field -->
+        <div class="space-y-2">
+            {{ form.about_me.label(class="block text-sm font-medium text-gray-700") }}
+            {{ form.about_me(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", rows=4) }}
+            {% for error in form.about_me.errors %}
+                <span class="text-sm text-red-600">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <!-- Submit Button and Profile Link -->
+        <div class="flex items-center justify-between pt-4">
+            {{ form.submit(class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") }}
+            <a href="{{ url_for('user', username=current_user.username) }}" 
+               class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                Back to Profile
+            </a>
+        </div>
+    </form>
+</div>
 {% endblock %}

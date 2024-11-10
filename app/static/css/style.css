@@ -1,0 +1,16 @@
+:root {
+    /* Primary Colors */
+    --color-primary: #2563EB;     /* Bright Blue */
+    --color-primary-dark: #1D4ED8; /* Darker Blue */
+    --color-primary-light: #60A5FA; /* Light Blue */
+
+    /* Neutral Colors */
+    --color-dark: #1E293B;        /* Dark Blue-Gray */
+    --color-body: #64748B;        /* Medium Gray */
+    --color-light: #F1F5F9;       /* Light Gray */
+
+    /* Accent Colors */
+    --color-success: #10B981;     /* Green */
+    --color-warning: #F59E0B;     /* Orange */
+    --color-error: #EF4444;       /* Red */
+} 

@@ -9,119 +9,198 @@ from app import login
 from hashlib import md5
 from sqlalchemy.orm import aliased
 from sqlalchemy import or_
+from time import time
+import jwt
+from app import app
+from sqlalchemy import event
+from sqlalchemy import func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List
+from sqlalchemy import Index
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import select
+from sqlalchemy import and_
+from sqlalchemy.orm import Query
+from sqlalchemy.orm import backref
 
 
 
-followers = sa.Table(
-    'followers',
-    db.metadata,
-    sa.Column('follower_id', sa.Integer, sa.ForeignKey('user.id'),
-              primary_key=True),
-    sa.Column('followed_id', sa.Integer, sa.ForeignKey('user.id'),
-              primary_key=True)
+
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
 
 
 class User(UserMixin, db.Model):
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    username: so.Mapped[str] = so.mapped_column(sa.String(64), index = True, unique=True, nullable=False)
-    email: so.Mapped[str] = so.mapped_column(sa.String(120), index = True, unique=True, nullable=False)
-    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
-    posts: so.WriteOnlyMapped['Post'] = so.relationship(back_populates='author')
-    about_me: so.Mapped[Optional [str]] = so.mapped_column(sa.String(180))
-    last_seen: so.Mapped[Optional[datetime]] = so.mapped_column(
+    __tablename__ = 'user'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(db.String(64), index=True, unique=True)
+    email: Mapped[str] = mapped_column(db.String(120), index=True, unique=True)
+    password_hash: Mapped[str] = mapped_column(db.String(128))
+    about_me: Mapped[Optional[str]] = mapped_column(sa.String(180))
+    last_seen: Mapped[Optional[datetime]] = mapped_column(
         default=lambda: datetime.now(timezone.utc)
     )
-    following: so.WriteOnlyMapped['User'] = so.relationship(
-        secondary=followers, primaryjoin=(followers.c.follower_id == id),
+
+    # Add indexes for better query performance
+    __table_args__ = (
+        Index('idx_user_username_email', 'username', 'email'),
+        Index('idx_user_last_seen', 'last_seen')
+    )
+
+    # Optimize relationships with join loading strategies
+    posts = relationship(
+        'Post',
+        back_populates='author',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+
+    followed = relationship(
+        'User',
+        secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
         secondaryjoin=(followers.c.followed_id == id),
-        back_populates='followers'
+        backref=backref('followers', lazy='dynamic'),
+        lazy='dynamic',
+        join_depth=1  # Optimize join depth
     )
 
-    followers: so.WriteOnlyMapped['User'] = so.relationship(
-        secondary=followers, primaryjoin=(followers.c.followed_id == id),
-        secondaryjoin=(followers.c.follower_id == id),
-        back_populates='following'
+    messages_sent = relationship(
+        'Message',
+        foreign_keys='Message.sender_id',
+        back_populates='sender',
+        lazy='dynamic',
+        cascade='all, delete-orphan'
+    )
+    
+    messages_received = relationship(
+        'Message',
+        foreign_keys='Message.recipient_id',
+        back_populates='recipient',
+        lazy='dynamic',
+        cascade='all, delete'
     )
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    @hybrid_property
+    def following_count(self) -> int:
+        return self.followed.count()
     
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    @hybrid_property
+    def followers_count(self) -> int:
+        return self.followers.count()
 
-
-    def __repr__(self):
-        return '<User {}>'.format(self.username)
+    def follow(self, user: 'User') -> bool:
+        if not user or not isinstance(user, User):
+            return False
+        if user.id == self.id:
+            return False
+        if not self.is_following(user):
+            self.followed.append(user)
+            return True
+        return False
     
+    def unfollow(self, user: 'User') -> bool:
+        if not user or not isinstance(user, User):
+            return False
+        if self.is_following(user):
+            self.followed.remove(user)
+            return True
+        return False
+
+    def is_following(self, user: 'User') -> bool:
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+
+    def followed_posts(self):
+        # Optimize query with single join and union
+        return (
+            db.session.scalars(
+                select(Post)
+                .where(
+                    or_(
+                        and_(
+                            followers.c.follower_id == self.id,
+                            followers.c.followed_id == Post.user_id
+                        ),
+                        Post.user_id == self.id
+                    )
+                )
+                .order_by(Post.timestamp.desc())
+                .execution_options(join_hint='USE_INDEX')
+            )
+        )
+
+    def following_posts(self):
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)).filter(
+                followers.c.follower_id == self.id)
+        own = Post.query.filter_by(user_id=self.id)
+        return followed.union(own).order_by(Post.timestamp.desc())
+
+    def search_posts(self, query):
+        return Post.query.filter(
+            or_(Post.body.ilike(f'%{query}%'),
+                Post.author.has(User.username.ilike(f'%{query}%')))
+        ).order_by(Post.timestamp.desc())
+
+    def search_users(self, query):
+        return User.query.filter(
+            or_(User.username.ilike(f'%{query}%'),
+                User.about_me.ilike(f'%{query}%'))
+        )
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                          algorithms=['HS256'])['reset_password']
+        except:
+            return None
+        return db.session.get(User, id)
+
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
 
-    def follow(self, user):
-        if not self.is_following(user):
-            self.following.add(user)
-    
-    def unfollow(self, user):
-        if self.is_following(user):
-            self.following.remove(user)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    def is_following(self, user):
-        query = self.following.select().where(User.id == user.id)
-        return db.session.scalar(query) is not None
-
-    def followers_count(self):
-        return db.session.scalar(sa.select(sa.func.count()).select_from(
-            self.followers.select().subquery()))
-    
-    def following_count(self):
-        return db.session.scalar(sa.select(sa.func.count()).select_from(
-            self.following.select().subquery()))
-
-    def followed_posts(self):
-        return Post.query.join(
-            followers, (followers.c.followed_id == Post.user_id)
-        ).filter(followers.c.follower_id == self.id).union(
-            Post.query.filter_by(user_id=self.id)
-        ).order_by(Post.timestamp.desc())
-
-    def following_posts(self):
-        return db.session.scalars(
-            sa.select(Post)
-            .join(followers, Post.user_id == followers.c.followed_id)
-            .where(followers.c.follower_id == self.id)
-            .order_by(Post.timestamp.desc())
-        )
-
-    def search_posts(self, query_text):
-        return db.session.scalars(
-            sa.select(Post)
-            .where(
-                or_(
-                    Post.body.ilike(f'%{query_text}%'),
-                    User.username.ilike(f'%{query_text}%')
-                )
-            )
-            .join(User, Post.user_id == User.id)
-            .order_by(Post.timestamp.desc())
-        )
-
-    def search_users(self, query_text):
-        return db.session.scalars(
-            sa.select(User)
-            .where(
-                or_(
-                    User.username.ilike(f'%{query_text}%'),
-                    User.email.ilike(f'%{query_text}%'),
-                    User.about_me.ilike(f'%{query_text}%')
-                )
-            )
-            .where(User.id != self.id)  # Exclude the current user
-            .order_by(User.username)
-        )
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
-class Post(db.Model):
+class SearchableMixin(object):
+    @classmethod
+    def search(cls, expression, page=1, per_page=10):
+        try:
+            ids, total = cls.query.filter(cls.__ts_vector__.match(expression)).with_entities(
+                cls.id, func.count(cls.id).over()
+            ).offset((page - 1) * per_page).limit(per_page).all()
+            if total == 0:
+                return cls.query.filter_by(id=0), 0
+            when = []
+            for i in range(len(ids)):
+                when.append((ids[i], i))
+            return cls.query.filter(cls.id.in_(ids)).order_by(
+                db.case(when, value=cls.id)), total
+        except Exception as e:
+            app.logger.error(f'Search error: {str(e)}')
+            return cls.query.filter_by(id=0), 0
+
+class Post(SearchableMixin, db.Model):
+    __searchable__ = ['body']  # fields to be searched
+    __table_args__ = (
+        Index('idx_post_timestamp', 'timestamp'),
+        Index('idx_post_user_id', 'user_id'),
+        {'extend_existing': True}  # Add this to prevent table conflicts
+    )
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     body: so.Mapped[str] = so.mapped_column(sa.String(9999))
     timestamp: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
@@ -132,9 +211,58 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post {}>'.format(self.body)
 
+# Move the event listener outside of the Post class
+@event.listens_for(Post, 'after_insert')
+def update_post_search_vector(mapper, connection, target):
+    try:
+        connection.execute(
+            'UPDATE post SET ts_vector = to_tsvector(\'english\', body) WHERE id = %s',
+            target.id
+        )
+    except Exception as e:
+        app.logger.error(f'Error updating search vector: {str(e)}')
+        # Consider whether to raise the exception or handle silently
+
 
 @login.user_loader
 def load_user(id):
-    return db.session.get(User, int(id))
+    try:
+        return db.session.get(User, int(id))
+    except Exception as e:
+        app.logger.error(f'Error loading user: {str(e)}')
+        return None
+
+
+class Message(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sender_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), index=True)
+    recipient_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), index=True)
+    body: Mapped[str] = mapped_column(sa.String(140))
+    timestamp: Mapped[datetime] = mapped_column(
+        index=True, default=lambda: datetime.now(timezone.utc)
+    )
+
+    # Optimize relationships with lazy loading and join conditions
+    sender: Mapped[User] = relationship(
+        'User',
+        foreign_keys=[sender_id],
+        back_populates='messages_sent',
+        lazy='joined'
+    )
+    
+    recipient: Mapped[User] = relationship(
+        'User',
+        foreign_keys=[recipient_id],
+        back_populates='messages_received',
+        lazy='joined'
+    )
+
+    def __repr__(self):
+        return f'<Message {self.body}>'
+
+    __table_args__ = (
+        Index('idx_message_timestamp', 'timestamp'),
+        Index('idx_message_sender_recipient', 'sender_id', 'recipient_id')
+    )
 
 

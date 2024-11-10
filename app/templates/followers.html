@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="max-w-2xl mx-auto px-4 py-8">
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold mb-2">Followers of {{ user.username }}</h1>
+            <p class="text-gray-600">{{ followers|length }} follower{{ 's' if followers|length != 1 }}</p>
+        </div>
+        
+        <div class="space-y-4">
+            {% for follower in followers %}
+                <div class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ follower.avatar(64) }}" 
+                             alt="{{ follower.username }}'s avatar"
+                             class="w-12 h-12 rounded-full">
+                        <div>
+                            <a href="{{ url_for('user', username=follower.username) }}" 
+                               class="font-medium hover:text-primary">
+                                {{ follower.username }}
+                            </a>
+                            {% if follower.about_me %}
+                                <p class="text-sm text-gray-600">{{ follower.about_me }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %} 

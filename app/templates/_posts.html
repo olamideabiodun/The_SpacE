@@ -1,6 +1,59 @@
-<table>
-    <tr valign="top">
-        <td><img style="border-radius: 50%;" src="{{user.avatar(20)}}" alt="user avatar"></td>
-        <td>{{ post.author.username }} tweets: <b>  {{post.body}}</td>
-    </tr>
-</table>
+<div class="posts-container">
+    {% for post in posts %}
+        <article class="post">
+            <div class="post-header">
+                <img class="avatar" src="{{ post.author.avatar(36) }}" alt="{{ post.author.username }}'s avatar">
+                <div class="post-meta">
+                    <a href="{{ url_for('user', username=post.author.username) }}" class="username">
+                        {{ post.author.username }}
+                    </a>
+                    <p class="tweet-text">{{ post.body }}</p>
+                </div>
+            </div>
+        </article>
+    {% endfor %}
+</div>
+
+<style>
+.posts-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.post {
+    padding: 1rem;
+    border-bottom: 1px solid #e6ecf0;
+}
+
+.post-header {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-meta {
+    flex: 1;
+}
+
+.username {
+    color: #1da1f2;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.username:hover {
+    text-decoration: underline;
+}
+
+.tweet-text {
+    margin: 0.5rem 0;
+    line-height: 1.4;
+}
+</style> 
