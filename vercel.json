@@ -11,5 +11,9 @@
             "src": "/(.*)",
             "dest": "/wsgi.py"
         }
-    ]
+    ],
+    "env": {
+        "FLASK_APP": "wsgi.py",
+        "FLASK_ENV": "production"
+    }
 } 
