@@ -261,3 +261,11 @@ def messages():
     messages = current_user.messages_received.order_by(
         Message.timestamp.desc()).all()
     return render_template('messages.html', messages=messages)
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.route('/')
+def index():
+    return render_template('index.html')

@@ -60,3 +60,6 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor.close()
 
 from app import routes, models, errors
+
+if __name__ == "__main__":
+    app.run()
