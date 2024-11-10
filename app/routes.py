@@ -11,33 +11,42 @@ from urllib.parse import urlsplit
 from app.forms import Register
 from datetime import timezone, datetime
 from app.forms import EditProfile
+from app.forms import EmptyForm
+from app.forms import PostForm
+from app.models import Post
 
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    user = current_user
-    posts= [
-        {
-            'author': {'username':'Fareedah'},
-            'body': 'I really wanna be the very best!'
-        },
-        {
-            'author': {'username':'Maddie'},
-            'body': 'I really hope i pass the design course!'
-        },
-        {
-            'author': {'username': 'Yasir'},
-            'body': 'May Allah accept all our prayers, Ameen!'
-        },
-        {
-            'author': {'username': 'Aarol'},
-            'body': 'I am not undecided!'
-        }
-        
-    ]
-    return render_template('index.html', title='Home page', posts=posts, user=user)
+    form = PostForm()
+    search_query = request.args.get('q', '')
+    
+    if search_query:
+        posts = current_user.search_posts(search_query).all()
+        users = current_user.search_users(search_query).all()
+    else:
+        posts = current_user.following_posts().all()
+        users = []
+    
+    return render_template('index.html', 
+                         title='Home', 
+                         posts=posts, 
+                         users=users, 
+                         search_query=search_query, 
+                         form=form)
+
+@app.route('/create_post', methods=['POST'])
+@login_required
+def create_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -87,6 +96,7 @@ def user(username):
         {'author': user, 'body': 'Testing'},
         {'author': user, 'body': 'Testing'}
     ]
+    form = EmptyForm()
     return render_template('user.html', user = user, posts = posts)
 
 @app.before_request
@@ -99,24 +109,54 @@ def before_request():
 @app.route('/editProfile', methods=['GET', 'POST'])
 @login_required
 def editProfile():
-    form = EditProfile()
-    # if form.validate_on_submit():
-    #     current_user.username = form.username.data
-    #     current_user.about_me = form.about_me.data
-    #     db.session.commit()
-    #     flash('Changes saved.')
-    #     return redirect(url_for('editProfile'))
-    # elif request.method == 'GET':
-    #     form.username.data = current_user.username
-    #     form.about_me.data = current_user.about_me
-    # return render_template('editProfile.html', title='Edit Profile', form=form)
-
-    if request.method == 'GET':
-        form.username.data = current_user.username
-        form.about_me.data = current_user.about_me
-        return render_template('editProfile.html', title='Edit Profile', form=form)
-    elif form.validate_on_submit():
+    form = EditProfile(current_user.username)
+    if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.commit()
+        flash('Changes saved.')
         return redirect(url_for('editProfile'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return render_template('editProfile.html', title='Edit Profile', form=form)
+
+    # if request.method == 'GET':
+    #     form.username.data = current_user.username
+    #     form.about_me.data = current_user.about_me
+    #     return render_template('editProfile.html', title='Edit Profile', form=form)
+    # elif form.validate_on_submit():
+    #     current_user.username = form.username.data
+    #     current_user.about_me = form.about_me.data
+    #     db.session.commit()
+
+@app.route('/follow/<username>')
+@login_required
+def follow(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    if user == current_user:
+        flash('You cannot follow yourself!')
+        return redirect(url_for('user', username=username))
+    current_user.follow(user)
+    db.session.commit()
+    flash(f'You are following {username}!')
+    return redirect(url_for('user', username=username))
+
+@app.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    user = db.first_or_404(sa.select(User).where(User.username == username))
+    if user == current_user:
+        flash('You cannot unfollow yourself!')
+        return redirect(url_for('user', username=username))
+    current_user.unfollow(user)
+    db.session.commit()
+    flash(f'You are not following {username}.')
+    return redirect(url_for('user', username=username))
+
+@app.route('/explore')
+@login_required
+def explore():
+    # Similar to index but shows all posts, not just from followed users
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', title='Explore', posts=posts)

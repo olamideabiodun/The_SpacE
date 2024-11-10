@@ -1,8 +1,83 @@
 {% extends "base.html" %}
-{% block content %}
 
-    <h1>Hello, {{user.username}} ??</h1>
-    {% for post in posts %}
-    <div><p>{{post.author.username}} says: <b><i>{{post.body}}</i></b></p></div>
-    {% endfor %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Post Form -->
+    {% if form %}
+    <div class="p-6 mb-8 bg-white rounded-lg shadow">
+        <h2 class="mb-4 text-xl font-bold text-gray-900">Create Post</h2>
+        <form action="{{ url_for('create_post') }}" method="post">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                {{ form.post(class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500", rows="3", placeholder="What's on your mind?") }}
+            </div>
+            <div class="flex justify-end">
+                {{ form.submit(class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700") }}
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Search Bar -->
+    <div class="mb-8">
+        <form action="{{ url_for('index') }}" method="get" class="flex gap-2">
+            <input type="text" name="q" value="{{ search_query }}" 
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Search posts and users...">
+            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Posts -->
+    <div class="space-y-6">
+        {% for post in posts %}
+        <div class="p-6 bg-white rounded-lg shadow">
+            <div class="flex items-center mb-4">
+                <img class="w-10 h-10 rounded-full" src="{{ post.author.avatar(36) }}" alt="Avatar">
+                <div class="ml-3">
+                    <a href="{{ url_for('user', username=post.author.username) }}" 
+                       class="text-sm font-medium text-gray-900 hover:underline">
+                        {{ post.author.username }}
+                    </a>
+                    <p class="text-sm text-gray-500">
+                        {{ moment(post.timestamp).fromNow() }}
+                    </p>
+                </div>
+            </div>
+            <p class="text-gray-700">{{ post.body }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Users (if searching) -->
+    {% if users %}
+    <div class="mt-8">
+        <h2 class="mb-4 text-xl font-bold text-gray-900">Users</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {% for user in users %}
+            <div class="p-4 bg-white rounded-lg shadow">
+                <div class="flex items-center">
+                    <img class="w-12 h-12 rounded-full" src="{{ user.avatar(48) }}" alt="Avatar">
+                    <div class="ml-3">
+                        <a href="{{ url_for('user', username=user.username) }}" 
+                           class="text-sm font-medium text-gray-900 hover:underline">
+                            {{ user.username }}
+                        </a>
+                        <p class="text-sm text-gray-500">
+                            {{ user.about_me or "No bio available" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
 {% endblock %}

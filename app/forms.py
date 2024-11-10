@@ -21,6 +21,8 @@ class Register(FlaskForm):
     submit = SubmitField('Register')
 
 
+
+
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
@@ -36,3 +38,25 @@ class EditProfile(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     about_me = TextAreaField('About me', validators=[Length(min=0, max=180)])
     submit = SubmitField('Save')
+
+    def __init__(self, originalUsername, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.originalUsername = originalUsername
+    
+    def validate_username(self, username):
+        if username.data != self.originalUsername:
+            user = db.session.scalar(sa.select(User).where(
+                User.username == username.data
+            ))
+            if user is not None:
+                raise ValidationError('Please use different username!')
+
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')
+
+class PostForm(FlaskForm):
+    post = TextAreaField('Say something', validators=[
+        DataRequired(), 
+        Length(min=1, max=140)
+    ])
+    submit = SubmitField('Post')

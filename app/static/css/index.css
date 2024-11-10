@@ -1,0 +1,118 @@
+/* Index page specific styles */
+.create-post-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.post-feed {
+    margin-top: 20px;
+}
+
+.post-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+}
+
+.post-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.post-metadata {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.post-content {
+    padding: 15px;
+}
+
+.post-actions {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Profile Summary Card */
+.profile-summary-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-mini-avatar {
+    width: 80px;
+    height: 80px;
+    border: 3px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Create Post Card */
+.create-post-card textarea {
+    border: 1px solid #e0e0e0;
+    resize: none;
+}
+
+/* Suggested Friends Card */
+.suggested-friends-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.suggested-friend-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.suggested-friend-item:last-child {
+    border-bottom: none;
+}
+
+/* Post Feed Styling */
+.post-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+}
+
+.post-header {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.post-content {
+    padding: 15px;
+    font-size: 1.1em;
+}
+
+.post-actions {
+    padding: 10px 15px;
+    border-top: 1px solid #eee;
+    background-color: var(--light-gray);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-summary-card,
+    .suggested-friends-card {
+        margin-bottom: 20px;
+    }
+} 

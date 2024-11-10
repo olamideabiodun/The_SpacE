@@ -3,35 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% if title %}
-    <title>{{title}} - Microblog</title>
-    {% else %}
-    <title>Faruq's Microblog</title>
-    {% endif %}
+    <title>{{ title }} - The S___E</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{ moment.include_moment() }}
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body>
-    <div>Microblog : <a href="{{ url_for('login')}}">Home</a>
-        {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login')}}">Login</a>
-        {% else %}
-        <a href="{{url_for('user', username=current_user.username)}}">Profile</a>
-        <a href="{{url_for('logout')}}">Logout</a>
-        {% endif %}
-    </div>
-    
-    <hr>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>
-            {{messages}}
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-    {% block content %}{%endblock%}
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <header class="fixed top-0 left-0 z-40 w-full bg-white border-b border-gray-200">
+        <div class="container px-4 mx-auto sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{{ url_for('index') }}" class="text-xl font-bold text-gray-800">Microblog</a>
+                </div>
 
+                <!-- Navigation Links -->
+                <nav class="hidden space-x-8 md:flex">
+                    <a href="{{ url_for('index') }}" class="text-base font-medium text-gray-500 hover:text-gray-900">Home</a>
+                    <a href="{{ url_for('explore') }}" class="text-base font-medium text-gray-500 hover:text-gray-900">Explore</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('user', username=current_user.username) }}" class="text-base font-medium text-gray-500 hover:text-gray-900">Profile</a>
+                        <a href="{{ url_for('logout') }}" class="text-base font-medium text-gray-500 hover:text-gray-900">Logout</a>
+                    {% endif %}
+                </nav>
+
+                <!-- Auth Buttons & User Avatar -->
+                <div class="flex items-center space-x-4">
+                    {% if current_user.is_anonymous %}
+                        <a href="{{ url_for('login') }}" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Login</a>
+                        <a href="{{ url_for('register') }}" class="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50">Register</a>
+                    {% else %}
+                        <!-- User Avatar -->
+                        <a href="{{ url_for('user', username=current_user.username) }}" class="flex items-center space-x-2">
+                            <img src="{{ current_user.avatar(36) }}" 
+                                 alt="Avatar" 
+                                 class="w-8 h-8 rounded-full border-2 border-gray-200 hover:border-blue-500"
+                                 title="{{ current_user.username }}'s profile">
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container px-4 mx-auto mt-24 sm:px-6 lg:px-8">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="p-4 mb-4 text-sm text-blue-700 bg-blue-100 rounded-lg" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

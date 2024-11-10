@@ -1,0 +1,15 @@
+2024-08-25 00:12:57,791 INFO: Microblog startup [in /Users/mac/microblog/app/__init__.py:44]
+2024-08-25 00:14:32,483 ERROR: Exception on /editProfile [POST] [in /Users/mac/microblog/venv/lib/python3.11/site-packages/flask/app.py:1414]
+Traceback (most recent call last):
+  File "/Users/mac/microblog/venv/lib/python3.11/site-packages/flask/app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/microblog/venv/lib/python3.11/site-packages/flask/app.py", line 1487, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/microblog/venv/lib/python3.11/site-packages/flask/app.py", line 1506, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/microblog/venv/lib/python3.11/site-packages/flask/app.py", line 1801, in make_response
+    raise TypeError(
+TypeError: The view function for 'editProfile' did not return a valid response. The function either returned None or ended without a return statement.

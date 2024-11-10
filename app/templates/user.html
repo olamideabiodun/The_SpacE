@@ -1,21 +1,67 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <table>
-        <tr valign=""top>
-            <td><img src="{{ user.avatar(80) }}"></td>
-            <td><h1>User: {{ user.username }}</h1>
-            {% if user.about_me %} <p>{{ user.about_me }}</p> {% endif %}
-            {% if user.last_seen %} <p>Last seen: {{ user.last_seen }} </p> {% endif %}
-            </td>
-        </tr>
-        {% if user == current_user %}
-                <p><a href="{{ url_for('editProfile') }}">Edit your profile</a></p>
-                {% endif %}
-    </table>
+<div class="container mt-4">
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ user.avatar(128) }}" class="rounded-circle mb-3" alt="{{ user.username }}">
+                    <h3 class="card-title">{{ user.username }}</h3>
+                    
+                    {% if user.about_me %}
+                        <p class="card-text text-muted">{{ user.about_me }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ user.followers_count() }}</h5>
+                            <small class="text-muted">Followers</small>
+                        </div>
+                        <div class="text-center">
+                            <h5 class="mb-0">{{ user.following_count() }}</h5>
+                            <small class="text-muted">Following</small>
+                        </div>
+                    </div>
 
-<hr>
-{% for post in posts %}
-   {% include '_posts.html' %}
-{% endfor %}
+                    {% if user != current_user %}
+                        {% if not current_user.is_following(user) %}
+                            <a href="{{ url_for('follow', username=user.username) }}" 
+                               class="btn btn-primary w-100">Follow</a>
+                        {% else %}
+                            <a href="{{ url_for('unfollow', username=user.username) }}" 
+                               class="btn btn-outline-primary w-100">Unfollow</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('editProfile') }}" 
+                           class="btn btn-outline-secondary w-100">Edit Profile</a>
+                    {% endif %}
+
+                    {% if user.last_seen %}
+                        <p class="card-text mt-3 small text-muted">
+                            Last seen: {{ user.last_seen }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Posts</h4>
+                    {% for post in posts %}
+                        {% include '_posts.html' %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/user.css') }}" rel="stylesheet">
 {% endblock %}
