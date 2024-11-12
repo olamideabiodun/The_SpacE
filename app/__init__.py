@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_moment import Moment
 from flask_mail import Mail
 import logging
+from logging import StreamHandler
 import sys
 
 # Initialize Flask extensions
