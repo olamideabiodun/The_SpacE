@@ -16,6 +16,7 @@ moment = Moment()
 mail = Mail()
 
 def create_app(config_class=Config):
+    logging.basicConfig(level=logging.INFO)
     app = Flask(__name__)
     app.config.from_object(config_class)
     app.config['POSTS_PER_PAGE'] = 25
