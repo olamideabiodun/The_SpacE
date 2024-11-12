@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv()
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'conn-key'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
     
