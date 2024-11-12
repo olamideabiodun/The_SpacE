@@ -139,3 +139,5 @@ AttributeError: 'function' object has no attribute 'c'
 2024-11-11 23:20:07,053 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:41]
 2024-11-11 23:28:20,562 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:41]
 2024-11-12 18:31:38,546 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:35]
+2024-11-12 18:47:46,451 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:35]
+2024-11-12 18:48:11,410 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:35]

@@ -3,7 +3,11 @@
     "builds": [
         {
             "src": "app/wsgi.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb",
+                "runtime": "python3.9"
+            }
         }
     ],
     "routes": [
@@ -15,5 +19,16 @@
     "env": {
         "FLASK_APP": "app/wsgi.py",
         "FLASK_ENV": "production"
+    },
+    "build": {
+        "env": {
+            "PIP_FLAGS": "--no-cache-dir"
+        }
+    },
+    "functions": {
+        "app/wsgi.py": {
+            "memory": 1024,
+            "maxDuration": 10
+        }
     }
 } 

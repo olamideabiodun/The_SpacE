@@ -6,8 +6,7 @@ from flask_login import LoginManager
 from flask_moment import Moment
 from flask_mail import Mail
 import logging
-from logging.handlers import RotatingFileHandler
-import os
+import sys
 
 # Initialize Flask extensions
 db = SQLAlchemy()
@@ -21,18 +20,12 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     app.config['POSTS_PER_PAGE'] = 25
 
-    # Add basic logging configuration
-    if not app.debug and not app.testing:
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/the_space.log', maxBytes=10240, backupCount=10)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
-        app.logger.setLevel(logging.INFO)
-        app.logger.info('The SpacE startup')
+    # Set database URL based on environment
+    if app.config.get('ENV') == 'production':
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config.get('DATABASE_URL')
+    else:
+        # Use SQLite for local development
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 
     # Initialize Flask extensions with app
     db.init_app(app)
@@ -59,5 +52,15 @@ def create_app(config_class=Config):
 
     # Move the models import here
     from app import models
+
+    # Configure logging for production
+    if not app.debug and not app.testing:
+        # Use sys.stdout for logging
+        logging.basicConfig(
+            stream=sys.stdout,
+            level=logging.INFO,
+            format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        )
+        app.logger.info('The Space startup')
 
     return app
