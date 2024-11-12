@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, render_template
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,16 +15,53 @@ login = LoginManager()
 moment = Moment()
 mail = Mail()
 
+def configure_logging(app):
+    # Clear any existing handlers to avoid duplicates
+    app.logger.handlers.clear()
+    
+    # Configure console handler
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    
+    # Set log level based on environment
+    if app.debug:
+        console_handler.setLevel(logging.DEBUG)
+        app.logger.setLevel(logging.DEBUG)
+    else:
+        console_handler.setLevel(logging.INFO)
+        app.logger.setLevel(logging.INFO)
+    
+    # Add handler to app logger
+    app.logger.addHandler(console_handler)
+    
+    # Log startup
+    app.logger.info('The Space startup')
+    
+    # Request logging
+    @app.before_request
+    def log_request_info():
+        app.logger.debug(f'Request: {request.method} {request.url}')
+        
+    @app.after_request
+    def log_response_info(response):
+        app.logger.debug(f'Response: {response.status}')
+        return response
+        
+    # Error logging
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        app.logger.error(f'Unhandled exception: {str(e)}', exc_info=True)
+        return render_template('errors/500.html'), 500
+
 def create_app(config_class=Config):
-    # Configure console logging
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    logging.basicConfig(
-        handlers=[console_handler],
-        format='%(asctime)s %(levelname)s: %(message)s'
-    )
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    # Configure logging first
+    configure_logging(app)
+    
     app.config['POSTS_PER_PAGE'] = 25
 
     # Set database URL based on environment
@@ -59,15 +96,5 @@ def create_app(config_class=Config):
 
     # Move the models import here
     from app import models
-
-    # Configure logging for production
-    if not app.debug and not app.testing:
-        # Use sys.stdout for logging
-        logging.basicConfig(
-            stream=sys.stdout,
-            level=logging.INFO,
-            format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        )
-        app.logger.info('The Space startup')
 
     return app
