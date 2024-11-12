@@ -5,6 +5,9 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_moment import Moment
 from flask_mail import Mail
+import logging
+from logging.handlers import RotatingFileHandler
+import os
 
 # Initialize Flask extensions
 db = SQLAlchemy()
@@ -16,6 +19,20 @@ mail = Mail()
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config['POSTS_PER_PAGE'] = 25
+
+    # Add basic logging configuration
+    if not app.debug and not app.testing:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/the_space.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('The SpacE startup')
 
     # Initialize Flask extensions with app
     db.init_app(app)
@@ -36,7 +53,11 @@ def create_app(config_class=Config):
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
-    return app
+    # Register API blueprint
+    from app.api import bp as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
 
-# Import models at the bottom
-from app import models
+    # Move the models import here
+    from app import models
+
+    return app

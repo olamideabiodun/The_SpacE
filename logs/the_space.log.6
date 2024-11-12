@@ -1,0 +1,114 @@
+2024-11-11 21:19:33,377 ERROR: Exception on /user/Tarek [GET] [in /usr/local/lib/python3.11/site-packages/flask/app.py:838]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/The_SpacE/app/main/routes.py", line 46, in user
+    return render_template('main/user.html', user=user, posts=posts, form=form)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/usr/local/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/mac/The_SpacE/app/templates/main/user.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/Users/mac/The_SpacE/app/templates/base.html", line 65, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/The_SpacE/app/templates/main/user.html", line 108, in block 'content'
+    {% include '_post.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: _post.html
+2024-11-11 21:22:20,133 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:23:43,604 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:24:23,408 ERROR: Exception on /index [GET] [in /usr/local/lib/python3.11/site-packages/flask/app.py:838]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/The_SpacE/app/main/routes.py", line 31, in index
+    return render_template('main/index.html',
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 150, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/templating.py", line 131, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/jinja2/environment.py", line 1304, in render
+    self.environment.handle_exception()
+  File "/usr/local/lib/python3.11/site-packages/jinja2/environment.py", line 939, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/mac/The_SpacE/app/templates/main/index.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/Users/mac/The_SpacE/app/templates/base.html", line 65, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/The_SpacE/app/templates/main/index.html", line 130, in block 'content'
+    {% include '_posts.html' %}
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mac/The_SpacE/app/templates/_posts.html", line 7, in top-level template code
+    <a href="{{ url_for('user', username=post.author.username) }}" class="username">
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'user' with values ['username']. Did you mean 'main.user' instead?
+2024-11-11 21:24:48,822 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:25:52,804 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:26:34,134 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:29:05,913 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:29:38,183 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:30:53,238 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:30:56,901 ERROR: Error updating search vector: mapping or list expected for parameters [in /Users/mac/The_SpacE/app/models.py:223]
+2024-11-11 21:39:09,489 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:39:18,435 ERROR: Error updating search vector: mapping or list expected for parameters [in /Users/mac/The_SpacE/app/models.py:223]
+2024-11-11 21:39:28,487 ERROR: Error updating search vector: mapping or list expected for parameters [in /Users/mac/The_SpacE/app/models.py:223]
+2024-11-11 21:43:20,520 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:46:29,137 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:48:45,075 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 21:54:06,837 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 22:15:00,750 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 22:16:37,208 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 22:17:14,869 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]
+2024-11-11 22:21:22,888 INFO: The SpacE startup [in /Users/mac/The_SpacE/app/__init__.py:40]

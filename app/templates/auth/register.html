@@ -36,7 +36,7 @@
 <section class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto min-h-screen">
         <div class="fade-in w-full max-w-md">
-            <a href="{{ url_for('index') }}" class="flex items-center justify-center mb-8">
+            <a href="{{ url_for('main.index') }}" class="flex items-center justify-center mb-8">
                 <span class="text-3xl font-bold text-gray-700">The_SpacE</span>
             </a>
             
@@ -89,7 +89,7 @@
                     </button>
                     
                     <p class="text-sm font-light text-gray-500 dark:text-gray-400">
-                        Already have an account? <a href="{{ url_for('login') }}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
+                        Already have an account? <a href="{{ url_for('auth.login') }}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
                     </p>
                 </form>
             </div>

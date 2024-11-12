@@ -15,7 +15,7 @@
                              alt="{{ follower.username }}'s avatar"
                              class="w-12 h-12 rounded-full">
                         <div>
-                            <a href="{{ url_for('user', username=follower.username) }}" 
+                            <a href="{{ url_for('main.user', username=follower.username) }}" 
                                class="font-medium hover:text-primary">
                                 {{ follower.username }}
                             </a>

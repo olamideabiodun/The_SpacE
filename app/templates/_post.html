@@ -1,6 +1,15 @@
-<table>
-    <tr valign="top">
-        <td><img style="border-radius: 50%;" src="{{user.avatar(20)}}" alt="user avatar"></td>
-        <td>{{ post.author.username }} tweets: <b>  {{post.body}}</td>
-    </tr>
-</table>
+<div class="bg-white rounded-lg shadow p-4">
+    <div class="flex items-center mb-4">
+        <img src="{{ post.author.avatar(36) }}" class="rounded-full mr-3">
+        <div>
+            <a href="{{ url_for('main.user', username=post.author.username) }}" 
+               class="font-semibold text-gray-900">
+                {{ post.author.username }}
+            </a>
+            <div class="text-sm text-gray-500">
+                {{ moment(post.timestamp).fromNow() }}
+            </div>
+        </div>
+    </div>
+    <p class="text-gray-700">{{ post.body }}</p>
+</div> 

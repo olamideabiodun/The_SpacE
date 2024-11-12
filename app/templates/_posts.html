@@ -1,17 +1,15 @@
 <div class="posts-container">
-    {% for post in posts %}
-        <article class="post">
-            <div class="post-header">
-                <img class="avatar" src="{{ post.author.avatar(36) }}" alt="{{ post.author.username }}'s avatar">
-                <div class="post-meta">
-                    <a href="{{ url_for('user', username=post.author.username) }}" class="username">
-                        {{ post.author.username }}
-                    </a>
-                    <p class="tweet-text">{{ post.body }}</p>
-                </div>
+    <article class="post">
+        <div class="post-header">
+            <img class="avatar" src="{{ post.author.avatar(36) }}" alt="{{ post.author.username }}'s avatar">
+            <div class="post-meta">
+                <a href="{{ url_for('main.user', username=post.author.username) }}" class="username">
+                    {{ post.author.username }}
+                </a>
+                <p class="tweet-text">{{ post.body }}</p>
             </div>
-        </article>
-    {% endfor %}
+        </div>
+    </article>
 </div>
 
 <style>

@@ -17,11 +17,11 @@
                     
                     <div class="flex flex-col items-start space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                         {% if current_user.is_anonymous %}
-                            <a href="{{ url_for('login') }}" 
+                            <a href="{{ url_for('auth.login') }}" 
                                class="rounded-md bg-primary px-8 py-3 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80">
                                 Get Started
                             </a>
-                            <a href="{{ url_for('register') }}" 
+                            <a href="{{ url_for('auth.register') }}" 
                                class="rounded-md border border-primary bg-transparent px-8 py-3 text-base font-semibold text-primary duration-300 ease-in-out hover:bg-primary hover:text-white">
                                 Sign Up Free
                             </a>
@@ -33,7 +33,7 @@
             <div class="hidden px-4 lg:block lg:w-7/12">
                 <div class="lg:ml-auto lg:text-right">
                     <div class="relative z-10 inline-block pt-11 lg:pt-0">
-                        <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&auto=format&fit=crop&q=80" 
+                        <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d" 
                              alt="hero" 
                              class="max-w-full lg:ml-auto">
                         <span class="absolute -left-8 -bottom-8 z-[-1]">
@@ -50,66 +50,115 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-16 md:py-20 lg:py-28">
+<section class="py-16 md:py-20 lg:py-28 bg-gray-50">
     <div class="container">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold text-dark mb-4">
+                Everything You Need in One Space
+            </h2>
+            <p class="text-xl text-body-color max-w-2xl mx-auto">
+                Discover powerful features designed specifically for architecture and engineering professionals
+            </p>
+        </div>
+
         <div class="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
             <!-- Feature 1: File Preview -->
-            <div class="w-full">
+            <div class="w-full group">
                 <div class="wow fadeInUp" data-wow-delay=".1s">
-                    <div class="relative mb-10">
-                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&auto=format&fit=crop&q=80" 
+                    <div class="relative mb-10 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80" 
                              alt="CAD Preview Feature" 
-                             class="w-full h-48 object-cover rounded-lg mb-4">
-                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
-                            <i class="fas fa-file-alt text-xl"></i>
+                             class="w-full h-48 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                            <div class="absolute bottom-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-xl bg-primary bg-opacity-90 text-white backdrop-blur-sm">
+                                <i class="fas fa-file-alt text-xl"></i>
+                            </div>
                         </div>
                     </div>
                     <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
                         CAD & BIM Preview
                     </h3>
                     <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
-                        Preview architectural and engineering files without specialized software.
+                        Preview and share architectural and engineering files directly in your browser. 
+                        Support for AutoCAD, Revit, SketchUp and more.
                     </p>
+                    <ul class="mt-4 space-y-2 text-body-color">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Multiple file format support
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Real-time collaboration tools
+                        </li>
+                    </ul>
                 </div>
             </div>
 
             <!-- Feature 2: Collaboration -->
-            <div class="w-full">
+            <div class="w-full group">
                 <div class="wow fadeInUp" data-wow-delay=".15s">
-                    <div class="relative mb-10">
-                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&auto=format&fit=crop&q=80" 
+                    <div class="relative mb-10 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80" 
                              alt="Collaboration Feature" 
-                             class="w-full h-48 object-cover rounded-lg mb-4">
-                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
-                            <i class="fas fa-users text-xl"></i>
+                             class="w-full h-48 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                            <div class="absolute bottom-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-xl bg-primary bg-opacity-90 text-white backdrop-blur-sm">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
                         </div>
                     </div>
                     <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
-                        Real-time Collaboration
+                        Team Collaboration
                     </h3>
                     <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
-                        Connect with team members, share feedback, and manage projects efficiently.
+                        Work seamlessly with your team members, share feedback, and manage projects efficiently 
+                        in real-time.
                     </p>
+                    <ul class="mt-4 space-y-2 text-body-color">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Real-time messaging
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Project management tools
+                        </li>
+                    </ul>
                 </div>
             </div>
 
             <!-- Feature 3: Learning -->
-            <div class="w-full">
+            <div class="w-full group">
                 <div class="wow fadeInUp" data-wow-delay=".2s">
-                    <div class="relative mb-10">
-                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80" 
+                    <div class="relative mb-10 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80" 
                              alt="Learning Feature" 
-                             class="w-full h-48 object-cover rounded-lg mb-4">
-                        <div class="absolute top-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-md bg-primary bg-opacity-90 text-white">
-                            <i class="fas fa-graduation-cap text-xl"></i>
+                             class="w-full h-48 object-cover rounded-2xl transition-transform duration-300 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent">
+                            <div class="absolute bottom-4 left-4 flex h-[50px] w-[50px] items-center justify-center rounded-xl bg-primary bg-opacity-90 text-white backdrop-blur-sm">
+                                <i class="fas fa-graduation-cap text-xl"></i>
+                            </div>
                         </div>
                     </div>
                     <h3 class="mb-5 text-xl font-bold text-dark sm:text-2xl lg:text-xl xl:text-2xl">
                         Learning Hub
                     </h3>
                     <p class="pr-[10px] text-base font-medium leading-relaxed text-body-color">
-                        Join study groups, access learning resources, and connect with instructors.
+                        Access educational resources, join study groups, and connect with industry experts 
+                        to enhance your skills.
                     </p>
+                    <ul class="mt-4 space-y-2 text-body-color">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Expert-led workshops
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-primary mr-2"></i>
+                            Resource library
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -124,7 +173,7 @@
             <h2 class="text-2xl font-bold text-dark">Recent Activity</h2>
         </div>
         
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="flex flex-col gap-6">
             {% for post in posts %}
                 <div class="wow fadeInUp rounded-md bg-white p-6 shadow-md">
                     {% include '_posts.html' %}

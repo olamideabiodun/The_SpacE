@@ -11,7 +11,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import or_
 from time import time
 import jwt
-from app import app
+from flask import current_app
 from sqlalchemy import event
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -84,13 +84,24 @@ class User(UserMixin, db.Model):
         cascade='all, delete'
     )
 
+    skills = db.relationship('Skill', backref='user', lazy='dynamic')
+
     @hybrid_property
     def following_count(self) -> int:
         return self.followed.count()
     
     @hybrid_property
-    def followers_count(self) -> int:
+    def followers_count(self):
         return self.followers.count()
+
+    @followers_count.expression
+    def followers_count(cls):
+        return (
+            select(func.count())
+            .select_from(followers)
+            .where(followers.c.followed_id == cls.id)
+            .scalar_subquery()
+        )
 
     def follow(self, user: 'User') -> bool:
         if not user or not isinstance(user, User):
@@ -154,12 +165,12 @@ class User(UserMixin, db.Model):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
-            app.config['SECRET_KEY'], algorithm='HS256')
+            current_app.config['SECRET_KEY'], algorithm='HS256')
 
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, app.config['SECRET_KEY'],
+            id = jwt.decode(token, current_app.config['SECRET_KEY'],
                           algorithms=['HS256'])['reset_password']
         except:
             return None
@@ -191,25 +202,43 @@ class SearchableMixin(object):
             return cls.query.filter(cls.id.in_(ids)).order_by(
                 db.case(when, value=cls.id)), total
         except Exception as e:
-            app.logger.error(f'Search error: {str(e)}')
+            current_app.logger.error(f'Search error: {str(e)}')
             return cls.query.filter_by(id=0), 0
 
-class Post(SearchableMixin, db.Model):
+class Post(db.Model):
     __searchable__ = ['body']  # fields to be searched
     __table_args__ = (
         Index('idx_post_timestamp', 'timestamp'),
         Index('idx_post_user_id', 'user_id'),
         {'extend_existing': True}  # Add this to prevent table conflicts
     )
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    body: so.Mapped[str] = so.mapped_column(sa.String(9999))
-    timestamp: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    likes = db.relationship(
+        'User', secondary='post_likes',
+        backref=db.backref('liked_posts', lazy='dynamic')
+    )
+    likes_count = db.Column(db.Integer, default=0)
+    comments_count = db.Column(db.Integer, default=0)
 
     author: so.Mapped[User] = so.relationship(back_populates='posts')
 
     def __repr__(self):
-        return '<Post {}>'.format(self.body)
+        return f'<Post {self.body}>'
+
+# Association table for post likes
+post_likes = db.Table('post_likes',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'))
+)
+
+# Association table for bookmarks
+bookmarks = db.Table('bookmarks',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'))
+)
 
 # Move the event listener outside of the Post class
 @event.listens_for(Post, 'after_insert')
@@ -220,7 +249,7 @@ def update_post_search_vector(mapper, connection, target):
             target.id
         )
     except Exception as e:
-        app.logger.error(f'Error updating search vector: {str(e)}')
+        current_app.logger.error(f'Error updating search vector: {str(e)}')
         # Consider whether to raise the exception or handle silently
 
 
@@ -229,14 +258,20 @@ def load_user(id):
     try:
         return db.session.get(User, int(id))
     except Exception as e:
-        app.logger.error(f'Error loading user: {str(e)}')
+        current_app.logger.error(f'Error loading user: {str(e)}')
         return None
 
 
 class Message(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    sender_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), index=True)
-    recipient_id: Mapped[int] = mapped_column(sa.ForeignKey('user.id', ondelete='CASCADE'), index=True)
+    sender_id: Mapped[int] = mapped_column(
+        sa.ForeignKey('user.id', ondelete='CASCADE', name='fk_message_sender'),
+        index=True
+    )
+    recipient_id: Mapped[int] = mapped_column(
+        sa.ForeignKey('user.id', ondelete='CASCADE', name='fk_message_recipient'),
+        index=True
+    )
     body: Mapped[str] = mapped_column(sa.String(140))
     timestamp: Mapped[datetime] = mapped_column(
         index=True, default=lambda: datetime.now(timezone.utc)
@@ -264,5 +299,14 @@ class Message(db.Model):
         Index('idx_message_timestamp', 'timestamp'),
         Index('idx_message_sender_recipient', 'sender_id', 'recipient_id')
     )
+
+
+class Skill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    def __repr__(self):
+        return f'<Skill {self.name}>'
 
 

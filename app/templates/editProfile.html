@@ -21,7 +21,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ url_for('user', username=current_user.username) }}" 
+                    <a href="{{ url_for('main.user', username=current_user.username) }}" 
                        class="btn btn-outline-secondary w-100">Back to Profile</a>
                 </div>
             </div>
@@ -90,7 +90,7 @@
         <!-- Submit Button and Profile Link -->
         <div class="flex items-center justify-between pt-4">
             {{ form.submit(class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2") }}
-            <a href="{{ url_for('user', username=current_user.username) }}" 
+            <a href="{{ url_for('main.user', username=current_user.username) }}" 
                class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
                 Back to Profile
             </a>
