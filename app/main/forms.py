@@ -5,10 +5,11 @@ from app.models import User
 
 class PostForm(FlaskForm):
     post = TextAreaField('Say something', validators=[
-        DataRequired(), Length(min=1, max=140)
+        DataRequired(), Length(min=1, max=9999)
     ])
-    comment = TextAreaField('Comment', validators=[DataRequired()])
     submit = SubmitField('Submit')
+    comment = TextAreaField('Comment', validators=[DataRequired()])
+    
 
 class EditProfile(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])

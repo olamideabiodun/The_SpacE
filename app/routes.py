@@ -64,7 +64,9 @@ def user(username):
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('main.user', username=username))
-    return render_template('user.html', user=user, posts=user.posts, form=form)
+
+    posts = Post.query.filter_by(author=user).order_by(Post.timestamp.desc()).all()
+    return render_template('main/user.html', user=user, posts=posts, form=form)
 
 @app.before_request
 def before_request():
