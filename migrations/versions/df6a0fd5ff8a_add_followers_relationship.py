@@ -34,6 +34,14 @@ def upgrade():
         # Optionally log that the table already exists
         print("The 'followers' table already exists. Skipping creation.")
 
+    # Assuming you are altering an existing table
+    with op.batch_alter_table('user') as batch_op:
+        batch_op.alter_column('password_hash',
+            type_=sa.String(length=256),  # Increase length as needed
+            existing_type=sa.String(length=128),
+            postgresql_using='password_hash::varchar(256)'  # PostgreSQL specific
+        )
+
 def downgrade():
     # Drop the 'followers' table if it exists
     conn = op.get_bind()
