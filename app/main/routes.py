@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_required
 from app import db
 from app.main import bp
-from app.models import User, Post, Message, followers as followers_table
+from app.models import User, Post, Message, followers as followers_table, Comment, Activity
 from app.main.forms import (
     PostForm, EditProfile, EmptyForm, MessageForm,
     ResetPasswordRequestForm, ResetPasswordForm
@@ -10,6 +10,10 @@ from app.main.forms import (
 from datetime import datetime, timezone
 from sqlalchemy import or_
 from app.email import send_password_reset_email
+from app.main.forms import CommentForm
+from flask_wtf import FlaskForm
+from wtforms import TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Length
 
 @bp.before_app_request
 def before_request():
@@ -40,11 +44,15 @@ def index():
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('main.index'))
+    else:
+        current_app.logger.debug(f'Form errors: {form.errors}')
     
+    recent_activities = Activity.query.order_by(Activity.timestamp.desc()).limit(10).all()
     return render_template('main/index.html', 
                          title='Home',
                          form=form,
-                         posts=posts.items)
+                         posts=posts.items,
+                         recent_activities=recent_activities)
 
 @bp.route('/explore')
 @login_required
@@ -99,6 +107,8 @@ def explore():
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
+    posts = db.session.query(Post).filter_by(author=user)\
+        .order_by(Post.timestamp.desc()).all()
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.post.data, author=current_user)
@@ -106,15 +116,9 @@ def user(username):
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('main.user', username=username))
-    
-    page = request.args.get('page', 1, type=int)
-    posts = user.posts.order_by(Post.timestamp.desc()).paginate(
-        page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
-    
-    return render_template('main/user.html', 
-                         user=user, 
-                         posts=posts.items, 
-                         form=form)
+    else:
+        current_app.logger.debug(f'Form errors: {form.errors}')
+    return render_template('main/user.html', user=user, posts=posts, form=form)
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
@@ -267,4 +271,60 @@ def dashboard():
 @login_required
 def post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template('main/post.html', post=post)
+    form = CommentForm()
+    return render_template('main/post.html', post=post, form=form)
+
+@bp.route('/post/<int:post_id>/comment', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.comment.data, post_id=post_id, author=current_user)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been added!', 'success')
+        return redirect(url_for('main.post', post_id=post_id))
+    return redirect(url_for('main.post', post_id=post_id))
+
+class CommentForm(FlaskForm):
+    comment = TextAreaField('Comment', validators=[
+        DataRequired(), Length(min=1, max=140)
+    ])
+    submit = SubmitField('Submit')
+
+@bp.route('/create_post', methods=['POST'])
+def create_post():
+    # Logic to create a post
+    # ...
+    
+    # Log the activity
+    activity = Activity(user_id=current_user.id, action="User created a post", post_id=new_post.id)
+    db.session.add(activity)
+    db.session.commit()
+    
+    return redirect(url_for('index'))
+
+@bp.route('/update_post/<int:post_id>', methods=['POST'])
+def update_post(post_id):
+    # Logic to update the post
+    # ...
+    
+    # Log the activity
+    activity = Activity(user_id=current_user.id, action="User updated a post", post_id=post_id)
+    db.session.add(activity)
+    db.session.commit()
+    
+    return redirect(url_for('index'))
+
+
+@bp.route('/update_profile', methods=['POST'])
+def update_profile():
+    # Logic to update user profile
+    # ...
+    
+    # Log the activity
+    activity = Activity(user_id=current_user.id, action="User updated their profile")
+    db.session.add(activity)
+    db.session.commit()
+    
+    return redirect(url_for('profile', user_id=current_user.id))

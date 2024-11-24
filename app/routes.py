@@ -21,6 +21,7 @@ from app.main.forms import ResetPasswordForm
 from sqlalchemy import or_
 from app.main.forms import MessageForm
 from app.models import Message
+from sqlalchemy.orm import joinedload
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -55,17 +56,15 @@ def index():
 @app.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
-    user = User.query.filter_by(username=username).first_or_404()
-    posts = db.session.query(Post).filter_by(author=user)\
-        .order_by(Post.timestamp.desc()).all()
+    user = User.query.options(joinedload(User.posts)).filter_by(username=username).first_or_404()
     form = PostForm()
     if form.validate_on_submit():
         post = Post(body=form.post.data, author=current_user)
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
-        return redirect(url_for('user', username=username))
-    return render_template('user.html', user=user, posts=posts, form=form)
+        return redirect(url_for('main.user', username=username))
+    return render_template('user.html', user=user, posts=user.posts, form=form)
 
 @app.before_request
 def before_request():
@@ -205,3 +204,15 @@ def not_found_error(error):
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
+
+@app.route('/post/<int:post_id>/comment', methods=['POST'])
+@login_required
+def add_comment(post_id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        comment = Comment(body=form.comment.data, post_id=post_id, author=current_user)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Your comment has been added!', 'success')
+        return redirect(url_for('main.post', post_id=post_id))
+    return redirect(url_for('main.post', post_id=post_id))

@@ -170,22 +170,26 @@
 <section class="py-16 bg-gray-50">
     <div class="container">
         <div class="mb-10">
-            <h2 class="text-2xl font-bold text-dark">Recent Activity</h2>
+            <h2 class="text-2xl font-bold text-dark">Recent Activities</h2>
         </div>
         
         <div class="flex flex-col gap-6">
-            {% for post in posts %}
+            {% for activity in recent_activities %}
                 <div class="wow fadeInUp rounded-md bg-white p-6 shadow-md">
-                    {% include '_posts.html' %}
+                    <strong>{{ activity.user.username }}</strong> {{ activity.action }} 
+                    <small class="text-muted">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+            {% else %}
+                <div class="wow fadeInUp rounded-md bg-white p-6 shadow-md">
+                    <p>No recent activities.</p>
                 </div>
             {% endfor %}
         </div>
     </div>
 </section>
 {% endif %}
-{% endblock %}
 
-{% block styles %}
+
 <style>
 :root {
     --color-primary: #3056D3;

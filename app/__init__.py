@@ -6,8 +6,8 @@ from flask_login import LoginManager
 from flask_moment import Moment
 from flask_mail import Mail
 import logging
-from logging import StreamHandler
-import sys
+import sys, os
+from dotenv import load_dotenv
 
 # Initialize Flask extensions
 db = SQLAlchemy()
@@ -38,7 +38,7 @@ def configure_logging(app):
     app.logger.addHandler(console_handler)
     
     # Log startup
-    app.logger.info('The Space startup')
+    app.logger.info('The Space')
     
     # Request logging
     @app.before_request
@@ -49,8 +49,7 @@ def configure_logging(app):
     def log_response_info(response):
         app.logger.debug(f'Response: {response.status}')
         return response
-        
-    # Error logging
+
     @app.errorhandler(Exception)
     def handle_exception(e):
         app.logger.error(f'Unhandled exception: {str(e)}', exc_info=True)
@@ -58,26 +57,21 @@ def configure_logging(app):
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    load_dotenv()
     app.config.from_object(config_class)
     
-    # Configure logging first
     configure_logging(app)
-    
-    app.config['POSTS_PER_PAGE'] = 25
 
-    # Set database URL based on environment
-    if app.config.get('ENV') == 'production':
-        database_url = app.config.get('DATABASE_URL')
-        if database_url and database_url.startswith('postgres://'):
-            database_url = database_url.replace('postgres://', 'postgresql://', 1)
-        app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-    else:
-        # Use SQLite for local development
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
 
     # Initialize Flask extensions with app
-    db.init_app(app)
-    migrate.init_app(app, db)
+    try:
+        db.init_app(app)
+        migrate.init_app(app, db)
+    except Exception as e:
+        app.logger.error(f'Database connection error: {str(e)}', exc_info=True)
+        raise
+
     login.init_app(app)
     moment.init_app(app)
     mail.init_app(app)
@@ -100,5 +94,8 @@ def create_app(config_class=Config):
 
     # Move the models import here
     from app import models
+
+    # Check the database URI
+    app.logger.info(f'Database URI: {app.config["SQLALCHEMY_DATABASE_URI"]}')
 
     return app

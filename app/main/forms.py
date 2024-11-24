@@ -7,6 +7,7 @@ class PostForm(FlaskForm):
     post = TextAreaField('Say something', validators=[
         DataRequired(), Length(min=1, max=140)
     ])
+    comment = TextAreaField('Comment', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class EditProfile(FlaskForm):
@@ -42,4 +43,10 @@ class ResetPasswordForm(FlaskForm):
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')]
     )
-    submit = SubmitField('Request Password Reset') 
+    submit = SubmitField('Request Password Reset')
+
+class CommentForm(FlaskForm):
+    comment = TextAreaField('Comment', validators=[
+        DataRequired(), Length(min=1, max=140)
+    ])
+    submit = SubmitField('Submit') 

@@ -1,19 +1,21 @@
-<form method="GET" action="{{ url_for('main.explore') }}" class="flex gap-2">
+<form method="POST" action="{{ url_for('main.user', username=current_user.username) }}" class="flex gap-2">
     {{ form.hidden_tag() }}
     <div class="mb-4">
         {{ form.post.label(class="block text-gray-700 text-sm font-bold mb-2") }}
         {{ form.post(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
     </div>
     <div class="flex items-center justify-between">
-        <button class="bg-primary hover:bg-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+        <button class="button-27 bg-black border-2 border-gray-800 text-white font-semibold text-lg rounded-lg py-3 px-5 w-full transition-transform duration-300 ease-out hover:shadow-lg hover:-translate-y-1 active:shadow-none active:translate-y-0" role="button">
             Post
         </button>
+
     </div>
+    
 </form>
 
 <style>
     /* Optional: Add subtle focus effect */
     textarea:focus {
-        background: rgba(17, 24, 39, 0.4);
+        background: rgba(108, 149, 236, 0.4);
     }
 </style> 
