@@ -2,11 +2,8 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_required
 from app import db
 from app.main import bp
-from app.models import User, Post, Message, followers as followers_table, Comment, Activity
-from app.main.forms import (
-    PostForm, EditProfile, EmptyForm, MessageForm,
-    ResetPasswordRequestForm, ResetPasswordForm
-)
+from app.models import User, Post, Message, followers as followers_table, Activity
+from app.main.forms import PostForm, EditProfile, EmptyForm, MessageForm
 from datetime import datetime, timezone
 from sqlalchemy import or_
 from app.email import send_password_reset_email
@@ -26,27 +23,22 @@ def before_request():
 @login_required
 def index():
     page = request.args.get('page', 1, type=int)
-    # Convert ScalarResult to Query object before pagination
     posts = db.session.query(Post).join(
         followers_table, (followers_table.c.followed_id == Post.user_id)
     ).filter(followers_table.c.follower_id == current_user.id).order_by(
         Post.timestamp.desc()
-    ).paginate(
-        page=page,
-        per_page=current_app.config['POSTS_PER_PAGE'],
-        error_out=False
-    )
-    
+    ).paginate(page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
+
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
+        post = Post(body=form.post.data.strip(), author=current_user)
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('main.index'))
     else:
         current_app.logger.debug(f'Form errors: {form.errors}')
-    
+
     recent_activities = Activity.query.order_by(Activity.timestamp.desc()).limit(10).all()
     return render_template('main/index.html', 
                          title='Home',
@@ -109,7 +101,7 @@ def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
+        post = Post(body=form.post.data.strip(), author=current_user)
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
@@ -250,16 +242,14 @@ def send_message(recipient):
         db.session.commit()
         flash('Your message has been sent.')
         return redirect(url_for('main.user', username=recipient))
-    return render_template('main/send_message.html', title='Send Message',
-                         form=form, recipient=user)
+    return render_template('main/send_message.html', title='Send Message', form=form, recipient=user)
 
 @bp.route('/messages')
 @login_required
 def messages():
     current_user.last_message_read_time = datetime.now(timezone.utc)
     db.session.commit()
-    messages = current_user.messages_received.order_by(
-        Message.timestamp.desc()).all()
+    messages = current_user.messages_received.order_by(Message.timestamp.desc()).all()
     return render_template('main/messages.html', messages=messages)
 
 @bp.route('/dashboard')
@@ -292,39 +282,3 @@ class CommentForm(FlaskForm):
     ])
     submit = SubmitField('Submit')
 
-@bp.route('/create_post', methods=['POST'])
-def create_post():
-    # Logic to create a post
-    # ...
-    
-    # Log the activity
-    activity = Activity(user_id=current_user.id, action="User created a post", post_id=new_post.id)
-    db.session.add(activity)
-    db.session.commit()
-    
-    return redirect(url_for('index'))
-
-@bp.route('/update_post/<int:post_id>', methods=['POST'])
-def update_post(post_id):
-    # Logic to update the post
-    # ...
-    
-    # Log the activity
-    activity = Activity(user_id=current_user.id, action="User updated a post", post_id=post_id)
-    db.session.add(activity)
-    db.session.commit()
-    
-    return redirect(url_for('index'))
-
-
-@bp.route('/update_profile', methods=['POST'])
-def update_profile():
-    # Logic to update user profile
-    # ...
-    
-    # Log the activity
-    activity = Activity(user_id=current_user.id, action="User updated their profile")
-    db.session.add(activity)
-    db.session.commit()
-    
-    return redirect(url_for('profile', user_id=current_user.id))
