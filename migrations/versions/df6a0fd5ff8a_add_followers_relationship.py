@@ -6,7 +6,8 @@ Create Date: 2024-11-10 21:45:53.337754
 
 """
 from alembic import op
-import sqlalchemy as sa, inspect
+import sqlalchemy as sa
+from sqlalchemy import inspect
 
 
 # revision identifiers, used by Alembic.
@@ -16,8 +17,12 @@ branch_labels = None
 depends_on = None
 
 def upgrade():
+    # Get the current connection and create an inspector
+    conn = op.get_bind()
+    inspector = inspect(conn)
+
     # Check if the 'followers' table already exists
-    if not op.get_bind().has_table('followers'):
+    if 'followers' not in inspector.get_table_names():
         op.create_table('followers',
             sa.Column('follower_id', sa.Integer(), nullable=False),
             sa.Column('followed_id', sa.Integer(), nullable=False),
@@ -31,5 +36,8 @@ def upgrade():
 
 def downgrade():
     # Drop the 'followers' table if it exists
-    if op.get_bind().has_table('followers'):
+    conn = op.get_bind()
+    inspector = inspect(conn)
+
+    if 'followers' in inspector.get_table_names():
         op.drop_table('followers')
