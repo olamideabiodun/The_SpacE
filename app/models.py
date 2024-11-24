@@ -38,7 +38,7 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(db.String(64), index=True, unique=True)
     email: Mapped[str] = mapped_column(db.String(120), index=True, unique=True)
-    password_hash: Mapped[str] = mapped_column(db.String(128))
+    password_hash: Mapped[str] = mapped_column(db.String(256))
     about_me: Mapped[Optional[str]] = mapped_column(sa.String(180))
     last_seen: Mapped[Optional[datetime]] = mapped_column(
         default=lambda: datetime.now(timezone.utc)
