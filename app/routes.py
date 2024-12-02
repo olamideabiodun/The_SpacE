@@ -56,16 +56,23 @@ def index():
 @app.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
-    user = User.query.options(joinedload(User.posts)).filter_by(username=username).first_or_404()
+    user = User.query.filter_by(username=username).first_or_404()
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash('Your post has been created!', 'success')
-        return redirect(url_for('main.user', username=username))
-
+        try:
+            post = Post(body=form.post.data.strip(), author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            flash('Your post has been created!', 'success')
+            return redirect(url_for('main.user', username=username))
+        except Exception as e:
+            current_app.logger.error(f'Error committing post: {str(e)}')
+            db.session.rollback()
+            flash('An error occurred while creating your post. Please try again.', 'danger')
+    
     posts = Post.query.filter_by(author=user).order_by(Post.timestamp.desc()).all()
+    current_app.logger.debug(f'Number of posts for user {user.username}: {len(posts)}')
+    
     return render_template('main/user.html', user=user, posts=posts, form=form)
 
 @app.before_request
@@ -99,20 +106,25 @@ def editProfile():
     #     current_user.about_me = form.about_me.data
     #     db.session.commit()
 
-@app.route('/follow/<username>')
+@app.route('/follow/<username>', methods=['POST'])
 @login_required
 def follow(username):
-    user = User.query.filter_by(username=username).first()
-    if user is None:
-        flash('User {} not found.'.format(username))
-        return redirect(url_for('index'))
-    if user == current_user:
-        flash('You cannot follow yourself!')
-        return redirect(url_for('user', username=username))
-    current_user.follow(user)
-    db.session.commit()
-    flash('You are following {}!'.format(username))
-    return redirect(url_for('user', username=username))
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+            flash(f'User {username} not found.')
+            return redirect(url_for('main.index'))
+        if user == current_user:
+            flash('You cannot follow yourself!')
+            return redirect(url_for('main.user', username=username))
+        current_user.follow(user)
+        db.session.commit()
+        flash(f'You are following {username}!')
+        return redirect(url_for('main.user', username=username))
+    
+    flash('There was an issue with your follow request. Please try again.')
+    return redirect(url_for('main.explore', q=request.args.get('q', '')))
 
 @app.route('/unfollow/<username>')
 @login_required

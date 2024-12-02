@@ -1,4 +1,4 @@
-<form methods="POST" action="{{ url_for('main.user', username=current_user.username) }}" class="flex gap-2">
+<form method="POST" action="{{ url_for('main.user', username=current_user.username) }}" class="flex gap-2">
     {{ form.hidden_tag() }}
     <div class="mb-4">
         {{ form.post.label(class="block text-gray-700 text-sm font-bold mb-2") }}
@@ -8,9 +8,7 @@
         <button class="button-27 bg-black border-2 border-gray-800 text-white font-semibold text-lg rounded-lg py-3 px-5 w-full transition-transform duration-300 ease-out hover:shadow-lg hover:-translate-y-1 active:shadow-none active:translate-y-0" type="submit">
             Post
         </button>
-
     </div>
-    
 </form>
 
 <style>

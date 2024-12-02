@@ -26,6 +26,9 @@
                         <!-- User Info -->
                         <div class="text-center mb-8">
                             <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ user.username }}</h1>
+                            <a href="{{ url_for('main.edit_profile', username=user.username) }}" class="text-gray-500 hover:text-gray-800 transition-all duration-300">
+                                <i class="fas fa-pencil-alt"></i> Edit Profile
+                            </a>
                             {% if user.about_me %}
                                 <p class="text-gray-600">{{ user.about_me }}</p>
                             {% endif %}

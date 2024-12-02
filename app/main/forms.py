@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, Length, ValidationError, Email, EqualTo
+from wtforms.validators import DataRequired, Length, ValidationError, Email, EqualTo, Optional
 from app.models import User
 
 class PostForm(FlaskForm):
@@ -12,8 +12,12 @@ class PostForm(FlaskForm):
     
 
 class EditProfile(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    about_me = TextAreaField('About me', validators=[Length(min=0, max=140)])
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), Length(min=1, max=64)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    about_me = TextAreaField('About Me', validators=[Optional(), Length(max=140)])
+    password = PasswordField('Password', validators=[Optional(), Length(min=6)])
+    new_password = PasswordField('New Password', validators=[Optional(), Length(min=6)])
     submit = SubmitField('Submit')
 
     def __init__(self, original_username, *args, **kwargs):

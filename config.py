@@ -13,6 +13,6 @@ class Config:
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.googlemail.com')
     MAIL_PORT = int(os.environ.get('MAIL_PORT', '587'))
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'True') == 'True'
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'olamidesokunbi15@gmail.com')
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'faruqolamide223@gmail.com')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     ADMINS = ['olamidesokunbi15@gmail.com']

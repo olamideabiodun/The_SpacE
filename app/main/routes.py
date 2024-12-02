@@ -3,14 +3,17 @@ from flask_login import current_user, login_required
 from app import db
 from app.main import bp
 from app.models import User, Post, Message, followers as followers_table, Activity
-from app.main.forms import PostForm, EditProfile, EmptyForm, MessageForm
+from app.main.forms import PostForm, EditProfile, EmptyForm, MessageForm, ResetPasswordForm, ResetPasswordRequestForm
 from datetime import datetime, timezone
 from sqlalchemy import or_
 from app.email import send_password_reset_email
 from app.main.forms import CommentForm
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField, SubmitField
-from wtforms.validators import DataRequired, Length
+from wtforms import TextAreaField, SubmitField, StringField, PasswordField
+from wtforms.validators import DataRequired, Length, Email, Optional
+from werkzeug.security import check_password_hash
+import requests
+from app.services.news_services import get_random_news
 
 @bp.before_app_request
 def before_request():
@@ -33,7 +36,11 @@ def index():
     if form.validate_on_submit():
         post = Post(body=form.post.data.strip(), author=current_user)
         db.session.add(post)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            current_app.logger.error(f'Error committing post: {str(e)}')
+            db.session.rollback()
         flash('Your post has been created!', 'success')
         return redirect(url_for('main.index'))
     else:
@@ -46,8 +53,7 @@ def index():
                          posts=posts.items,
                          recent_activities=recent_activities)
 
-@bp.route('/explore')
-@login_required
+@bp.route('/explore', methods=['GET'])
 def explore():
     search_query = request.args.get('q', '').strip()
     
@@ -89,43 +95,58 @@ def explore():
     posts = posts_query.paginate(
         page=page, per_page=current_app.config['POSTS_PER_PAGE'], error_out=False)
     
+    latest_news = get_random_news()
+    
     return render_template('main/explore.html',
                          title='Explore',
                          posts=posts.items,
                          featured_users=featured_users,
-                         search_query=search_query)
+                         search_query=search_query,
+                         news=latest_news)
 
 @bp.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = PostForm()
+    
     if form.validate_on_submit():
-        post = Post(body=form.post.data.strip(), author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash('Your post has been created!', 'success')
-        return redirect(url_for('main.user', username=username))
+        try:
+            post = Post(body=form.post.data.strip(), author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            flash('Your post has been created!', 'success')
+            return redirect(url_for('main.user', username=username))
+        except Exception as e:
+            current_app.logger.error(f'Error committing post: {str(e)}')
+            db.session.rollback()
+            flash('An error occurred while creating your post. Please try again.', 'danger')
     else:
+        flash('Please correct the errors in the form.', 'danger')
         current_app.logger.debug(f'Form errors: {form.errors}')
-
+    
     posts = Post.query.filter_by(author=user).order_by(Post.timestamp.desc()).all()
+    current_app.logger.debug(f'Number of posts for user {user.username}: {len(posts)}')
+    
     return render_template('main/user.html', user=user, posts=posts, form=form)
 
-@bp.route('/edit_profile', methods=['GET', 'POST'])
+@bp.route('/edit_profile/<username>', methods=['GET', 'POST'])
 @login_required
-def edit_profile():
-    form = EditProfile(current_user.username)
+def edit_profile(username):
+    form = EditProfile(original_username=username)
     if form.validate_on_submit():
-        current_user.username = form.username.data
-        current_user.about_me = form.about_me.data
-        db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('main.edit_profile'))
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.about_me.data = current_user.about_me
-    return render_template('main/edit_profile.html', title='Edit Profile', form=form)
+        if check_password_hash(current_user.password_hash, form.current_password.data):
+            if form.new_password.data:
+                current_user.set_password(form.new_password.data)
+            current_user.username = form.username.data
+            current_user.email = form.email.data
+            current_user.about_me = form.about_me.data
+            db.session.commit()
+            flash('Your changes have been saved.')
+            return redirect(url_for('main.profile', username=current_user.username))
+        else:
+            flash('Current password is incorrect.', 'danger')
+    return render_template('main/edit_profile.html', form=form, user=current_user)
 
 @bp.route('/follow/<username>', methods=['POST'])
 @login_required
@@ -139,11 +160,22 @@ def follow(username):
         if user == current_user:
             flash('You cannot follow yourself!')
             return redirect(url_for('main.user', username=username))
-        current_user.follow(user)
-        db.session.commit()
-        flash(f'You are following {username}!')
+        
+        try:
+            if current_user.follow(user):
+                db.session.commit()
+                flash(f'You are now following {username}!')
+            else:
+                flash(f'You are already following {username}.')
+        except Exception as e:
+            db.session.rollback()  # Rollback the session in case of error
+            current_app.logger.error(f'Error following user {username}: {e}')
+            flash('An error occurred while trying to follow the user. Please try again.')
+        
         return redirect(url_for('main.user', username=username))
-    return redirect(url_for('main.index'))
+    
+    flash('There was an issue with your follow request. Please try again.')
+    return redirect(url_for('main.explore', q=request.args.get('q', '')))
 
 @bp.route('/unfollow/<username>', methods=['POST'])
 @login_required
@@ -231,6 +263,8 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
     return render_template('main/reset_password.html', form=form)
 
+
+# will work on this later
 @bp.route('/send_message/<recipient>', methods=['GET', 'POST'])
 @login_required
 def send_message(recipient):
@@ -252,10 +286,6 @@ def messages():
     messages = current_user.messages_received.order_by(Message.timestamp.desc()).all()
     return render_template('main/messages.html', messages=messages)
 
-@bp.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('main/dashboard.html')
 
 @bp.route('/post/<int:post_id>')
 @login_required
@@ -281,4 +311,17 @@ class CommentForm(FlaskForm):
         DataRequired(), Length(min=1, max=140)
     ])
     submit = SubmitField('Submit')
+
+def fetch_latest_news():
+    api_key = 'c837c86742e740c18ddc42ecfb52852e'
+    url = f'https://newsapi.org/v2/everything?q=edtech&apiKey={api_key}'
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses
+        news_data = response.json()
+        return news_data.get('articles', [])
+    except Exception as e:
+        current_app.logger.error(f'Error fetching news: {str(e)}')
+        return []
 

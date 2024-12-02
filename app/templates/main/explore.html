@@ -18,7 +18,7 @@
                        placeholder="Search posts, users, or topics..." 
                        class="w-full px-4 py-2 rounded-md border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none">
                 <button type="submit" 
-                        class="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/80 transition-colors">
+                        class="px-6 py-2 bg-primary text-black rounded-md hover:bg-primary/80 transition-colors">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
@@ -59,6 +59,25 @@
                                   transition-colors duration-300">
                             View Profile
                         </a>
+                        
+                        <!-- Follow/Unfollow Button -->
+                        {% if current_user.is_following(user) %}
+                        <form action="{{ url_for('main.unfollow', username=user.username) }}" method="post">
+                            <button type="submit" 
+                                    class="w-full px-6 py-3 rounded-xl bg-primary text-black font-medium
+                                           hover:bg-primary-dark transition-all duration-300 shadow-md hover:shadow-lg">
+                                Unfollow
+                            </button>
+                        </form>
+                        {% else %}
+                        <form action="{{ url_for('main.follow', username=user.username) }}" method="post">
+                            <button type="submit" 
+                                    class="w-full px-6 py-3 rounded-xl border-2 border-primary text-primary font-medium
+                                           hover:bg-primary hover:text-black transition-all duration-300">
+                                Follow
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -132,10 +151,29 @@
         <div class="mb-12">
             <h2 class="text-2xl font-bold text-dark mb-6">Featured Professionals</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {% for i in range(4) %}
-                <!-- Add your featured users here -->
-                {% endfor %}
+                
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest News Section -->
+<section class="py-12 bg-gray-50">
+    <div class="container">
+        <h2 class="text-2xl font-bold text-dark mb-6">Latest EdTech News</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for article in news %}
+            <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
+                <img src="{{ article.get('urlToImage') }}" alt="{{ article.title }}" class="mb-2 rounded-md">  <!-- Image display -->
+                <h4 class="font-semibold text-lg">{{ article.title }}</h4>
+                <p class="text-gray-600">{{ article.description }}</p>
+                <a href="{{ article.url }}" target="_blank" class="mt-2 inline-block px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">Read More</a>
+            </div>
+            {% else %}
+            <div class="p-12 text-center text-gray-500">
+                <p>No news articles available at this time.</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </section>

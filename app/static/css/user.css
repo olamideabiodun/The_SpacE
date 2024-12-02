@@ -1,36 +1,94 @@
-/* User profile specific styles */
-.profile-card {
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+/* General Styles */
+body {
+    background-color: #f8f9fa; /* Light background for better contrast */
+    font-family: 'Arial', sans-serif; /* Clean font for readability */
 }
 
-.profile-card:hover {
-    transform: translateY(-5px);
+/* User Profile Card */
+.profile-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: #ffffff; /* White background for profile card */
+    padding: 20px;
+    margin-bottom: 20px; /* Space between cards */
 }
 
 .profile-avatar {
-    width: 128px;
-    height: 128px;
-    border: 4px solid white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 128px; /* Ensure consistent avatar size */
+    height: 128px; /* Ensure consistent avatar size */
+    border: 3px solid #007bff; /* Blue border for the avatar */
+    border-radius: 50%; /* Circular avatar */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Stats styling */
+/* Stats Container */
 .stats-container {
-    background-color: var(--secondary-color);
-    border-radius: 10px;
-    padding: 15px;
-    margin: 15px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 15px 0; /* Add margin for spacing */
 }
 
 .stat-item {
-    padding: 0 20px;
-    border-right: 1px solid #dee2e6;
+    flex: 1; /* Ensure equal distribution of space */
+    text-align: center;
+    background-color: #f1f1f1; /* Light gray background for stats */
+    padding: 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
 }
 
-.stat-item:last-child {
-    border-right: none;
+.stat-item:hover {
+    background-color: #e2e6ea; /* Darker gray on hover */
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff; /* Primary color */
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d; /* Secondary color */
+}
+
+/* Edit Form Card */
+.edit-form-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: #ffffff; /* White background for edit form */
+    padding: 20px;
+}
+
+.form-label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    height: 45px; /* Set a consistent height for input fields */
+    border: 1px solid #ced4da; /* Add border for input fields */
+    padding: 0.375rem 0.75rem; /* Add padding for better spacing */
+}
+
+.btn-primary {
+    background-color: #007bff; /* Primary color */
+    border-color: #0056b3; /* Border color */
+    color: white; /* Text color */
+    padding: 0.5rem 1rem; /* Padding for button */
+    border-radius: 5px; /* Rounded corners */
+    transition: all 0.3s ease-in-out; /* Smooth transition */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+.text-danger {
+    color: #dc3545; /* Danger color for error messages */
 }
 
 /* User posts section styling */
